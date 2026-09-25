@@ -20,16 +20,18 @@ app.use(express.json());
 app.use(cookieParser());
 
 const protect=require("./middleware/authMiddleware");
-
+const interviewRoutes=require("./routes/interviewRoutes");
+const dashboardRoutes=require("./routes/dashboardRoutes");
+const jobRoutes=require("./routes/jobRoutes");
 app.get("/", (req, res) => {
     res.render("login");
 });
 
 app.use("/", authRoutes);
+app.use("/",interviewRoutes);
+app.use("/", dashboardRoutes);
+app.use("/",jobRoutes);
 
-app.get("/dashboard",protect,(req,res)=>{
-    res.render("dashboard");
-})
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
