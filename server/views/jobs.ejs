@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Hiring Roles</title>
+</head>
+
+<body>
+
+    <h1>My Hiring Roles</h1>
+
+    <a href="/create-job">Create New Hiring Role</a>
+
+    <hr>
+
+    <% if (jobs.length === 0) { %>
+
+        <p>You haven't created any hiring roles yet.</p>
+
+    <% } else { %>
+
+        <% jobs.forEach(job => { %>
+
+            <div>
+                <h2><%= job.title %></h2>
+
+                <p>
+                    <%= job.description %>
+                </p>
+
+                <p>
+                    Status: <%= job.status %>
+                </p>
+
+                <hr>
+            </div>
+
+        <% }) %>
+
+    <% } %>
+
+    <a href="/dashboard">Back to Dashboard</a>
+
+</body>
+</html>

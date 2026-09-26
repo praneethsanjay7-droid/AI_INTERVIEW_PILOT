@@ -1,13 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Interview Pilot - Dashboard</title>
+    <title>Dashboard</title>
 </head>
+
 <body>
 
-    <h1>Interview Pilot Dashboard</h1>
+    <h1>Interview Dashboard</h1>
 
-    <p>Welcome to your dashboard.</p>
+    <a href="/create-interview">Create Interview</a>
+
+    <h2>Your Interviews</h2>
+
+    <% if (interviews.length === 0) { %>
+
+        <p>No interviews created yet.</p>
+
+    <% } else { %>
+
+        <% interviews.forEach(interview => { %>
+
+            <div>
+                <h3><%= interview.candidateName %></h3>
+
+                <p>
+                    Email: <%= interview.candidateEmail %>
+                </p>
+
+                <p>
+                    Position: <%= interview.position %>
+                </p>
+
+                <p>
+                    Status: <%= interview.status %>
+                </p>
+
+                <hr>
+            </div>
+
+        <% }) %>
+
+    <% } %>
 
 </body>
 </html>

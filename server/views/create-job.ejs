@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Hiring Role</title>
+</head>
+
+<body>
+
+    <h1>Create Hiring Role</h1>
+
+    <form action="/create-job" method="POST">
+
+        <div>
+            <label>Job Title</label>
+            <input
+                type="text"
+                name="title"
+                placeholder="e.g. Frontend Developer"
+                required
+            >
+        </div>
+
+        <br>
+
+        <div>
+            <label>Job Description</label>
+            <textarea
+                name="description"
+                placeholder="Enter job description"
+                required
+            ></textarea>
+        </div>
+
+        <br>
+
+        <button type="submit">
+            Create Hiring Role
+        </button>
+
+    </form>
+
+    <br>
+
+    <a href="/dashboard">Back to Dashboard</a>
+
+</body>
+</html>
