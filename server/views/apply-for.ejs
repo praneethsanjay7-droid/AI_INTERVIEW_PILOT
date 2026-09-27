@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Apply for Job</title>
+</head>
+
+<body>
+
+    <h1>Apply for <%= job.title %></h1>
+
+    <p>
+        <%= job.description %>
+    </p>
+
+    <form
+        action="/apply/<%= job._id %>"
+        method="POST"
+        enctype="multipart/form-data"
+    >
+
+        <label>Upload Resume (PDF)</label>
+
+        <input
+            type="file"
+            name="resume"
+            accept=".pdf"
+            required
+        >
+
+        <br><br>
+
+        <button type="submit">
+            Submit Application
+        </button>
+
+    </form>
+
+    <br>
+
+    <a href="/available-jobs">Back to Jobs</a>
+
+</body>
+</html>

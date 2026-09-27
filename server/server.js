@@ -1,6 +1,7 @@
+require("dotenv").config();
 const express = require("express");
 const path = require("path");
-
+const cloudinary=require("./config/cloudinary");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const cookieParser=require("cookie-parser");
@@ -23,6 +24,7 @@ const protect=require("./middleware/authMiddleware");
 const interviewRoutes=require("./routes/interviewRoutes");
 const dashboardRoutes=require("./routes/dashboardRoutes");
 const jobRoutes=require("./routes/jobRoutes");
+const applicationRoutes = require("./routes/applicationRoutes");
 app.get("/", (req, res) => {
     res.render("login");
 });
@@ -31,6 +33,7 @@ app.use("/", authRoutes);
 app.use("/",interviewRoutes);
 app.use("/", dashboardRoutes);
 app.use("/",jobRoutes);
+app.use("/",applicationRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

@@ -1,0 +1,66 @@
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Schedule Interview</title>
+</head>
+<body>
+
+```
+<h1>Schedule Interview</h1>
+
+<h2>Candidate</h2>
+
+<p>
+    Name:
+    <%= application.candidate.name %>
+</p>
+
+<p>
+    Email:
+    <%= application.candidate.email %>
+</p>
+
+<h2>Job</h2>
+
+<p>
+    Position:
+    <%= application.job.title %>
+</p>
+
+<form
+    action="/schedule-interview/<%= application._id %>"
+    method="POST"
+>
+
+    <label for="scheduledAt">
+        Interview Date and Time
+    </label>
+
+    <br>
+
+    <input
+        type="datetime-local"
+        id="scheduledAt"
+        name="scheduledAt"
+        required
+    >
+
+    <br><br>
+
+    <button type="submit">
+        Schedule Interview
+    </button>
+
+</form>
+
+<br>
+
+<a href="/jobs/<%= application.job._id %>/applicants">
+    Back to Applicants
+</a>
+```
+
+</body>
+</html>

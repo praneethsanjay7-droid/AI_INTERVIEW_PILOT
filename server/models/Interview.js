@@ -3,26 +3,25 @@ const User=require("./User");
 const Schema=mongoose.Schema;
 
 const interviewSchema=new Schema({
+    application:{
+        type:Schema.Types.ObjectId,
+        ref:"Application",
+        required:true
+    },
+
     interviewer:{
         type:Schema.Types.ObjectId,
         ref:"User",
         required:true
     },
-    candidateName:{
-        type:String,
-        required:true
-    },
-    candidateEmail:{
-        type:String,
-        required:true
-    },
-    position:{
-        type:String,
+    scheduledAt:{
+        type:Date,
         required:true
     },
     status:{
-       type: String,
-       default:"Scheduled"
+        type:String,
+        enum:["scheduled","ongoing","completed","cancelled"],
+        default:"scheduled"
     },
     createdAt:{
         type:Date,

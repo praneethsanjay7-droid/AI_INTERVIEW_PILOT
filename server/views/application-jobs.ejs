@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Available Jobs</title>
+</head>
+
+<body>
+
+    <h1>Available Jobs</h1>
+
+    <% if (jobs.length === 0) { %>
+
+        <p>No jobs are currently available.</p>
+
+    <% } else { %>
+
+        <% jobs.forEach(job => { %>
+
+            <div>
+                <h2><%= job.title %></h2>
+
+                <p><%= job.description %></p>
+
+                <p>Status: <%= job.status %></p>
+
+                <a href="/apply/<%= job._id %>">
+                    Apply for this job
+                </a>
+
+                <hr>
+            </div>
+
+        <% }) %>
+
+    <% } %>
+
+    <a href="/dashboard">Back to Dashboard</a>
+
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Applicants</title>
+</head>
+<body>
+
+```
+<h1>Applicants for <%= job.title %></h1>
+
+<% if (applications.length === 0) { %>
+
+    <p>No applicants yet.</p>
+
+<% } else { %>
+
+    <% applications.forEach(application => { %>
+
+        <div>
+            <h2><%= application.candidate.name %></h2>
+
+            <p>Email: <%= application.candidate.email %></p>
+
+            <p>Status: <%= application.status %></p>
+
+            <a href="<%= application.resumeUrl %>" target="_blank">
+                View Resume
+            </a>
+            <a href="/schedule-interview/<%= application._id %>">
+    Schedule Interview
+</a>
+            <hr>
+        </div>
+
+    <% }) %>
+
+<% } %>
+
+<a href="/jobs">Back to Hiring Roles</a>
+```
+
+</body>
+</html>

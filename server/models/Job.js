@@ -26,4 +26,4 @@ const jobSchema=new Schema({
     }
 });
 
-module.exports=mongoose.model("Jobs",jobSchema);
+module.exports=mongoose.model("Job",jobSchema);
