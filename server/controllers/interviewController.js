@@ -103,15 +103,96 @@ const scheduleInterview=async(req,res)=>{
     application.status="shortlisted";
     await application.save();
 
-    res.send("interview scheduled successfully");
+res.redirect(`/interview-room/${interview._id}`);
 }catch(err){
     console.log(err);
     res.status(500).send("Failed to schedule interview");
 }
 }
+
+const showInterviewRoom = async (req, res) => {
+    try {
+        const interview = await Interview.findOne({
+            _id: req.params.interviewId,
+            interviewer: req.user.userId
+        })
+        .populate({
+            path: "application",
+            populate: [
+                {
+                    path: "candidate",
+                    select: "name email"
+                },
+                {
+                    path: "job",
+                    select: "title description"
+                }
+            ]
+        });
+
+        if (!interview) {
+            return res.send("Interview not found or you are not authorized");
+        }
+
+        res.render("interview-room", {
+            interview: interview
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to load interview room");
+    }
+};
+const startInterview = async (req, res) => {
+    try {
+       
+
+        const interview = await Interview.findById(
+            req.params.interviewId
+        );
+
+
+        if (!interview) {
+            return res.send("Interview not found");
+        }
+
+        if (interview.interviewer.toString() !== req.user.userId) {
+            return res.send("You are not authorized for this interview");
+        }
+
+        if (interview.status === "ongoing") {
+    return res.redirect(`/interview-room/${interview._id}`);
+}
+
+if (interview.status !== "scheduled") {
+    return res.send("Interview cannot be started");
+}
+
+        const currentTime = new Date();
+
+        if (currentTime < interview.scheduledAt) {
+            return res.send(
+                "Interview cannot be started before the scheduled time"
+            );
+        }
+
+        interview.status = "ongoing";
+
+        await interview.save();
+
+        res.redirect(`/interview-room/${interview._id}`);
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to start interview");
+    }
+};
+
 module.exports = {
     showCreateInterview,
     createInterview,
     showSchedulePage,
-    scheduleInterview
+    scheduleInterview,
+    showInterviewRoom,
+    startInterview
 };

@@ -1,14 +1,18 @@
 require("dotenv").config();
 const express = require("express");
+const app=express();
 const path = require("path");
 const cloudinary=require("./config/cloudinary");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const cookieParser=require("cookie-parser");
+const http=require("http");
+const server=http.createServer(app);
+const {Server}=require("socket.io");
+const io=new Server(server);
 
 connectDB();
 
-const app = express();
 
 const PORT = 5000;
 
@@ -35,6 +39,43 @@ app.use("/", dashboardRoutes);
 app.use("/",jobRoutes);
 app.use("/",applicationRoutes);
 
-app.listen(PORT, () => {
+io.on("connection", (socket) => {
+
+    console.log("A user connected:", socket.id);
+
+    socket.on("join-interview", (interviewId) => {
+
+        socket.join(interviewId);
+
+        console.log(
+            `Socket ${socket.id} joined interview ${interviewId}`
+        );
+
+    });
+
+socket.on("transcript", (data) => {
+
+    console.log(
+        "Transcript received:",
+        data.text
+    );
+
+    io.to(data.interviewId).emit(
+        "transcript",
+        {
+            text: data.text
+        }
+    );
+
+});
+
+
+    socket.on("disconnect", () => {
+        console.log("A user disconnected:", socket.id);
+    });
+
+});
+
+server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
