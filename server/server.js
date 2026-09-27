@@ -29,6 +29,8 @@ const interviewRoutes=require("./routes/interviewRoutes");
 const dashboardRoutes=require("./routes/dashboardRoutes");
 const jobRoutes=require("./routes/jobRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
+const Transcript = require("./models/Transcripts");
+
 app.get("/", (req, res) => {
     res.render("login");
 });
@@ -52,22 +54,43 @@ io.on("connection", (socket) => {
         );
 
     });
+socket.on("transcript", async (data) => {
 
-socket.on("transcript", (data) => {
+    try {
 
-    console.log(
-        "Transcript received:",
-        data.text
-    );
+        console.log(
+            "Transcript received:",
+            data.text
+        );
 
-    io.to(data.interviewId).emit(
-        "transcript",
-        {
+        const transcript = new Transcript({
+            interview: data.interviewId,
+            speaker: data.speaker || "candidate",
             text: data.text
-        }
-    );
+        });
+
+        await transcript.save();
+
+        io.to(data.interviewId).emit(
+            "transcript",
+            {
+                text: transcript.text,
+                speaker: transcript.speaker,
+                timestamp: transcript.timestamp
+            }
+        );
+
+    } catch (err) {
+
+        console.log(
+            "Failed to save transcript:",
+            err
+        );
+
+    }
 
 });
+
 
 
     socket.on("disconnect", () => {
