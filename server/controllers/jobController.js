@@ -39,6 +39,7 @@ const showJobs = async (req, res) => {
         res.send("Failed to load jobs");
     }
 };
+
 module.exports = {
     showCreateJob,
     createJob,

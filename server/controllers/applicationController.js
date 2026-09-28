@@ -1,4 +1,5 @@
 const Job = require("../models/Job");
+const Interview=require("../models/Interview")
 const Application=require("../models/Application");
 const cloudinary=require("../config/cloudinary");
 
@@ -107,9 +108,47 @@ const showApplicants = async (req, res) => {
     }
 };
 
+const showMyApplications = async (req, res) => {
+    try {
+
+        const applications = await Application.find({
+            candidate: req.user.userId
+        })
+        .populate("job")
+        .sort({ createdAt: -1 });
+
+        const interviews = await Interview.find({
+            interviewer: { $exists: true }
+        }).populate({
+            path: "application",
+            populate: {
+                path: "candidate"
+            }
+        });
+
+        const myInterviews = interviews.filter(interview =>
+            interview.application &&
+            interview.application.candidate &&
+            interview.application.candidate._id.toString() ===
+            req.user.userId
+        );
+
+        res.render("my-applications", {
+            applications: applications,
+            interviews: myInterviews
+        });
+
+    } catch (err) {
+
+        console.log(err);
+        res.status(500).send("Failed to load applications");
+
+    }
+};
 module.exports={
     showAvailableJobs,
     showApplyPage,
     applyForJob,
-    showApplicants
+    showApplicants,
+    showMyApplications
 };

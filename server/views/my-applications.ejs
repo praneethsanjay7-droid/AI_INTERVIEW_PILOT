@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Applications</title>
+</head>
+
+<body>
+
+    <h1>My Applications</h1>
+
+    <% if (applications.length === 0) { %>
+
+        <p>You have not applied for any jobs yet.</p>
+
+    <% } else { %>
+
+        <% applications.forEach(application => { %>
+
+            <hr>
+
+            <h2>
+                <%= application.job.title %>
+            </h2>
+
+            <p>
+                <strong>Description:</strong>
+                <%= application.job.description %>
+            </p>
+
+            <p>
+                <strong>Application Status:</strong>
+                <%= application.status %>
+                <%
+    const interview = interviews.find(item =>
+        item.application &&
+        item.application._id.toString() ===
+        application._id.toString()
+    );
+%>
+
+<% if (interview) { %>
+
+    <h3>Interview Scheduled</h3>
+
+    <p>
+        <strong>Date:</strong>
+        <%= interview.scheduledAt.toLocaleDateString() %>
+    </p>
+
+    <p>
+        <strong>Time:</strong>
+        <%= interview.scheduledAt.toLocaleTimeString() %>
+    </p>
+
+    <p>
+        <strong>Interview Status:</strong>
+        <%= interview.status %>
+    </p>
+
+    <% if (interview.status === "scheduled") { %>
+
+        <a href="/candidate-interview/<%= interview._id %>">
+            Join Interview
+        </a>
+
+    <% } else if (interview.status === "ongoing") { %>
+
+        <a href="/candidate-interview/<%= interview._id %>">
+            Join Ongoing Interview
+        </a>
+
+    <% } %>
+
+<% } %>
+            </p>
+
+            <p>
+                <strong>Applied On:</strong>
+                <%= application.createdAt.toLocaleString() %>
+            </p>
+
+        <% }) %>
+
+    <% } %>
+
+</body>
+</html>

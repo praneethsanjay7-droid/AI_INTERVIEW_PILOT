@@ -1,6 +1,7 @@
 const Interview = require("../models/Interview");
 const Application=require("../models/Application");
 const Job=require("../models/Job");
+const Transcript=require("../models/Transcripts");
 
 const showCreateInterview = (req, res) => {
     res.render("create-interview");
@@ -133,16 +134,54 @@ const showInterviewRoom = async (req, res) => {
         if (!interview) {
             return res.send("Interview not found or you are not authorized");
         }
+        const transcripts = await Transcript.find({
+    interview: interview._id
+}).sort({ timestamp: 1 });
 
-        res.render("interview-room", {
-            interview: interview
-        });
+      res.render("interview-room", {
+    interview: interview,
+    transcripts: transcripts
+});
 
     } catch (err) {
         console.log(err);
         res.status(500).send("Failed to load interview room");
     }
 };
+
+
+const showCandidateInterviewRoom = async (req, res) => {
+    try {
+        const interview = await Interview.findById(
+            req.params.interviewId
+        )
+        .populate({
+            path: "application",
+            populate: [
+                {
+                    path: "candidate"
+                },
+                {
+                    path: "job"
+                }
+            ]
+        });
+
+        if (!interview) {
+            return res.send("Interview not found");
+        }
+
+        res.render("candidate-interview", {
+            interview: interview
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to load interview");
+    }
+};
+
+
 const startInterview = async (req, res) => {
     try {
        
@@ -188,11 +227,14 @@ if (interview.status !== "scheduled") {
     }
 };
 
+
+
 module.exports = {
     showCreateInterview,
     createInterview,
     showSchedulePage,
     scheduleInterview,
     showInterviewRoom,
-    startInterview
+    startInterview,
+    showCandidateInterviewRoom
 };

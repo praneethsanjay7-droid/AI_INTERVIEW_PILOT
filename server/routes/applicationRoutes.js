@@ -4,7 +4,8 @@ const {
     showAvailableJobs,
     showApplyPage,
     applyForJob,
-    showApplicants
+    showApplicants,
+    showMyApplications
 } = require("../controllers/applicationController");
 
 const upload = require("../config/multer");
@@ -27,6 +28,12 @@ router.get(
     "/jobs/:jobId/applicants",
     protect,
     showApplicants
+);
+
+router.get(
+    "/my-applications",
+    protect,
+    showMyApplications
 );
 
 module.exports = router;

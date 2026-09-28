@@ -54,6 +54,41 @@ io.on("connection", (socket) => {
         );
 
     });
+
+    socket.on("webrtc-offer", (data) => {
+
+    socket.to(data.interviewId).emit(
+        "webrtc-offer",
+        {
+            offer: data.offer
+        }
+    );
+
+});
+
+socket.on("webrtc-answer", (data) => {
+
+    socket.to(data.interviewId).emit(
+        "webrtc-answer",
+        {
+            answer: data.answer
+        }
+    );
+
+});
+
+socket.on("webrtc-ice-candidate", (data) => {
+
+    socket.to(data.interviewId).emit(
+        "webrtc-ice-candidate",
+        {
+            candidate: data.candidate
+        }
+    );
+
+});
+
+
 socket.on("transcript", async (data) => {
 
     try {

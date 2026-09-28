@@ -127,8 +127,18 @@
 
 <h2>Live Transcript</h2>
 
-<div id="transcript"></div>
+<div id="transcript">
 
+    <% transcripts.forEach(item => { %>
+
+        <p>
+            <strong><%= item.speaker %>:</strong>
+            <%= item.text %>
+        </p>
+
+    <% }) %>
+
+</div>
 <br>
 
 <input
@@ -140,6 +150,27 @@
 <button id="sendTranscriptBtn">
     Send Transcript
 </button>
+
+<hr>
+
+<h2>Interview Media</h2>
+
+<video
+    id="localVideo"
+    autoplay
+    muted
+    playsinline
+    width="400"
+></video>
+
+<br><br>
+
+<button id="enableMediaBtn">
+    Enable Camera & Microphone
+</button>
+
+<p id="mediaStatus"></p>
+
 
 <% if (interview.status === "scheduled") { %>
     <script>
@@ -367,6 +398,54 @@ socket.on("transcript", (data) => {
     paragraph.textContent = data.text;
 
     transcript.appendChild(paragraph);
+
+});
+
+const localVideo =
+    document.getElementById("localVideo");
+
+const enableMediaBtn =
+    document.getElementById("enableMediaBtn");
+
+const mediaStatus =
+    document.getElementById("mediaStatus");
+
+let localStream = null;
+
+let peerConnection = null;
+
+enableMediaBtn.addEventListener("click", async () => {
+
+    try {
+
+        localStream =
+            await navigator.mediaDevices.getUserMedia({
+                video: true,
+                audio: true
+            });
+
+        localVideo.srcObject = localStream;
+            peerConnection = new RTCPeerConnection();
+            localStream.getTracks().forEach((track) => {
+    peerConnection.addTrack(track, localStream);
+});
+    const offer = await peerConnection.createOffer();
+
+    await peerConnection.setLocalDescription(offer);
+
+    
+        mediaStatus.textContent =
+            "Camera and microphone enabled.";
+
+        enableMediaBtn.disabled = true;
+
+    } catch (error) {
+
+        console.error(error);
+
+        mediaStatus.textContent =
+            "Camera or microphone permission was denied.";
+    }
 
 });
 

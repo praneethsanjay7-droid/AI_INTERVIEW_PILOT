@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Candidate Interview</title>
+</head>
+
+<body>
+
+    <h1>Candidate Interview Room</h1>
+
+    <h2>Interview Details</h2>
+
+    <p>
+        <strong>Job:</strong>
+        <%= interview.application.job.title %>
+    </p>
+
+    <p>
+        <strong>Candidate:</strong>
+        <%= interview.application.candidate.name %>
+    </p>
+
+    <p>
+        <strong>Interview Status:</strong>
+        <%= interview.status %>
+    </p>
+
+    <hr>
+
+    <h2>Camera & Microphone</h2>
+
+    <video
+        id="localVideo"
+        autoplay
+        muted
+        playsinline
+        width="400">
+    </video>
+
+    <br><br>
+
+    <button id="enableMediaBtn">
+        Enable Camera & Microphone
+    </button>
+
+    <p id="mediaStatus"></p>
+
+
+    <script src="/socket.io/socket.io.js">
+        const socket = io();
+
+const interviewId = "<%= interview._id %>";
+
+socket.on("connect", () => {
+
+    console.log(
+        "Candidate connected to Socket.IO:",
+        socket.id
+    );
+
+    socket.emit("join-interview", interviewId);
+
+});
+socket.on("webrtc-offer", (data) => {
+
+    console.log("WebRTC offer received:", data);
+
+});
+
+
+    </script>
+    <script>
+
+        const localVideo =
+            document.getElementById("localVideo");
+
+        const enableMediaBtn =
+            document.getElementById("enableMediaBtn");
+
+        const mediaStatus =
+            document.getElementById("mediaStatus");
+
+        let localStream = null;
+
+        enableMediaBtn.addEventListener("click", async () => {
+
+            try {
+
+                localStream =
+                    await navigator.mediaDevices.getUserMedia({
+                        video: true,
+                        audio: true
+                    });
+
+                localVideo.srcObject = localStream;
+
+                mediaStatus.textContent =
+                    "Camera and microphone enabled.";
+
+                enableMediaBtn.disabled = true;
+
+            } catch (error) {
+
+                console.error(error);
+
+                mediaStatus.textContent =
+                    "Camera or microphone permission was denied.";
+            }
+
+        });
+
+    </script>
+
+</body>
+</html>
