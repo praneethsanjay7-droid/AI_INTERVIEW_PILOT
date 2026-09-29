@@ -117,21 +117,11 @@ const showMyApplications = async (req, res) => {
         .populate("job")
         .sort({ createdAt: -1 });
 
-        const interviews = await Interview.find({
-            interviewer: { $exists: true }
-        }).populate({
-            path: "application",
-            populate: {
-                path: "candidate"
-            }
-        });
-
-        const myInterviews = interviews.filter(interview =>
-            interview.application &&
-            interview.application.candidate &&
-            interview.application.candidate._id.toString() ===
-            req.user.userId
-        );
+        const applicationIds = applications.map(application => application._id);
+        const myInterviews = await Interview.find({
+            application: { $in: applicationIds },
+            status: { $in: ["scheduled", "ongoing"] }
+        }).sort({ scheduledAt: -1 });
 
         res.render("my-applications", {
             applications: applications,

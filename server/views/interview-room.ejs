@@ -5,9 +5,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interview Room</title>
+    <style>
+        .window-role {
+            display: inline-block;
+            margin: 16px 0 8px;
+            padding: 8px 12px;
+            border-left: 4px solid #a34f00;
+            background: #fff2df;
+            color: #713800;
+            font-weight: 700;
+        }
+    </style>
 </head>
 
 <body>
+
+    <div class="window-role" role="status" aria-label="Current interview window: interviewer">
+        Interviewer Window
+    </div>
 
     <h1>Interview Room</h1>
 
@@ -170,6 +185,26 @@
 </button>
 
 <p id="mediaStatus"></p>
+
+<h3>Interviewer</h3>
+
+<video
+    id="localVideo"
+    autoplay
+    muted
+    playsinline
+    width="400">
+</video>
+
+<h3>Candidate</h3>
+
+<video
+    id="remoteVideo"
+    autoplay
+    playsinline
+    width="400">
+</video>
+
 
 
 <% if (interview.status === "scheduled") { %>
@@ -351,105 +386,311 @@
 <% } %>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
+<script>
+    const socket = io();
 
-const interviewId = "<%= interview._id %>";
+    const interviewId = "<%= interview._id %>";
 
-socket.on("connect", () => {
-    console.log("Connected to Socket.IO:", socket.id);
+    socket.on("connect", () => {
+        console.log("Connected to Socket.IO:", socket.id);
 
-    socket.emit("join-interview", interviewId);
-});
-
-socket.on("disconnect", () => {
-    console.log("Disconnected from Socket.IO");
-});
-
-const transcriptInput =
-    document.getElementById("transcriptInput");
-
-const sendTranscriptBtn =
-    document.getElementById("sendTranscriptBtn");
-
-const transcript =
-    document.getElementById("transcript");
-
-sendTranscriptBtn.addEventListener("click", () => {
-
-    const text = transcriptInput.value.trim();
-
-    if (!text) {
-        return;
-    }
-
-    socket.emit("transcript", {
-        interviewId: interviewId,
-        text: text
+        socket.emit("join-interview", {
+            interviewId,
+            role: "interviewer"
+        });
     });
 
-    transcriptInput.value = "";
+    socket.on("interview-participant-connected", (participant) => {
+        if (participant.role === "candidate") {
+            console.log(
+                "Candidate connected to Socket.IO:",
+                participant.socketId
+            );
+        }
+    });
+
+    socket.on("candidate-media-enabled", () => {
+        console.log("Candidate camera and microphone enabled");
+    });
+
+    socket.on("disconnect", () => {
+        console.log("Disconnected from Socket.IO");
+    });
+
+
+    // -------------------------
+    // TRANSCRIPT
+    // -------------------------
+
+    const transcriptInput =
+        document.getElementById("transcriptInput");
+
+    const sendTranscriptBtn =
+        document.getElementById("sendTranscriptBtn");
+
+    const transcript =
+        document.getElementById("transcript");
+
+    sendTranscriptBtn.addEventListener("click", () => {
+
+        const text = transcriptInput.value.trim();
+
+        if (!text) {
+            return;
+        }
+
+        socket.emit("transcript", {
+            interviewId: interviewId,
+            text: text
+        });
+
+        transcriptInput.value = "";
+    });
+
+    socket.on("transcript", (data) => {
+
+        const paragraph = document.createElement("p");
+
+        paragraph.textContent = data.text;
+
+        transcript.appendChild(paragraph);
+
+    });
+
+
+    // -------------------------
+    // CAMERA / MICROPHONE
+    // -------------------------
+
+    const localVideo =
+        document.getElementById("localVideo");
+
+    const enableMediaBtn =
+        document.getElementById("enableMediaBtn");
+
+    const mediaStatus =
+        document.getElementById("mediaStatus");
+
+    let localStream = null;
+
+    let peerConnection = null;
+    const remoteVideo=document.getElementById("remoteVideo");
+    console.log("Remote video element:", remoteVideo);
+
+
+    peerConnection=new RTCPeerConnection();
+
+peerConnection.addEventListener("track", (event) => {
+
+    console.log("Remote track received");
+    console.log("Track kind:", event.track.kind);
+    console.log("Track enabled:", event.track.enabled);
+    console.log("Track readyState:", event.track.readyState);
+
+    if (event.streams && event.streams[0]) {
+
+        remoteVideo.srcObject = event.streams[0];
+
+        console.log(
+            "Remote stream assigned:",
+            remoteVideo.srcObject
+        );
+
+        console.log(
+            "Remote video tracks:",
+            event.streams[0].getVideoTracks()
+        );
+
+        console.log(
+            "Remote audio tracks:",
+            event.streams[0].getAudioTracks()
+        );
+    }
+});
+    // -------------------------
+    // INTERVIEWER STARTS WEBRTC
+    // -------------------------
+
+    enableMediaBtn.addEventListener("click", async () => {
+
+        try {
+
+            localStream =
+                await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: true
+                });
+
+            localVideo.srcObject = localStream;
+
+
+            // Create PeerConnection
+            peerConnection = new RTCPeerConnection();
+
+
+            // -------------------------
+            // ICE CANDIDATE LISTENER
+    peerConnection.addEventListener("track", (event) => {
+
+    console.log("Remote track received");
+
+    console.log("Track kind:", event.track.kind);
+    console.log("Track enabled:", event.track.enabled);
+    console.log("Track readyState:", event.track.readyState);
+
+    if (event.streams && event.streams[0]) {
+
+        remoteVideo.srcObject = event.streams[0];
+
+        console.log(
+            "Remote stream assigned:",
+            remoteVideo.srcObject
+        );
+
+        console.log(
+            "Remote video tracks:",
+            event.streams[0].getVideoTracks()
+        );
+
+        console.log(
+            "Remote audio tracks:",
+            event.streams[0].getAudioTracks()
+        );
+    }
 });
 
-socket.on("transcript", (data) => {
+            peerConnection.addEventListener(
+                "icecandidate",
+                (event) => {
 
-    const paragraph = document.createElement("p");
+                    if (event.candidate) {
 
-    paragraph.textContent = data.text;
+                        socket.emit("webrtc-ice-candidate", {
+                            interviewId: interviewId,
+                            candidate: event.candidate
+                        });
 
-    transcript.appendChild(paragraph);
+                        console.log(
+                            "Interviewer ICE candidate sent"
+                        );
+                    }
 
-});
+                }
+            );
 
-const localVideo =
-    document.getElementById("localVideo");
 
-const enableMediaBtn =
-    document.getElementById("enableMediaBtn");
+            // Add camera and microphone tracks
+            localStream.getTracks().forEach((track) => {
 
-const mediaStatus =
-    document.getElementById("mediaStatus");
+                peerConnection.addTrack(
+                    track,
+                    localStream
+                );
 
-let localStream = null;
-
-let peerConnection = null;
-
-enableMediaBtn.addEventListener("click", async () => {
-
-    try {
-
-        localStream =
-            await navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: true
             });
 
-        localVideo.srcObject = localStream;
-            peerConnection = new RTCPeerConnection();
-            localStream.getTracks().forEach((track) => {
-    peerConnection.addTrack(track, localStream);
-});
-    const offer = await peerConnection.createOffer();
 
-    await peerConnection.setLocalDescription(offer);
+            // Create offer
+            const offer =
+                await peerConnection.createOffer();
 
-    
-        mediaStatus.textContent =
-            "Camera and microphone enabled.";
 
-        enableMediaBtn.disabled = true;
+            await peerConnection.setLocalDescription(
+                offer
+            );
 
-    } catch (error) {
 
-        console.error(error);
+            // Send offer to candidate
+            socket.emit("webrtc-offer", {
 
-        mediaStatus.textContent =
-            "Camera or microphone permission was denied.";
-    }
+                interviewId: interviewId,
 
-});
+                offer:
+                    peerConnection.localDescription
 
-    </script>
+            });
+
+
+            console.log("WebRTC offer sent");
+
+
+            mediaStatus.textContent =
+                "Camera and microphone enabled.";
+
+            enableMediaBtn.disabled = true;
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            mediaStatus.textContent =
+                "Camera or microphone permission was denied.";
+
+        }
+
+    });
+
+
+    // -------------------------
+    // RECEIVE WEBRTC ANSWER
+    // -------------------------
+
+    socket.on("webrtc-answer", async (data) => {
+
+        try {
+
+            await peerConnection.setRemoteDescription(
+                data.answer
+            );
+
+            console.log(
+                "WebRTC answer received"
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Failed to apply WebRTC answer:",
+                error
+            );
+
+        }
+
+    });
+
+
+    // -------------------------
+    // RECEIVE ICE CANDIDATE
+    // -------------------------
+
+    socket.on(
+        "webrtc-ice-candidate",
+        async (data) => {
+
+            try {
+
+                await peerConnection.addIceCandidate(
+                    data.candidate
+                );
+
+                console.log(
+                    "Interviewer ICE candidate received"
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Failed to add interviewer ICE candidate:",
+                    error
+                );
+
+            }
+
+        }
+    );
+
+</script>
 
 </body>
 

@@ -45,14 +45,23 @@ io.on("connection", (socket) => {
 
     console.log("A user connected:", socket.id);
 
-    socket.on("join-interview", (interviewId) => {
+    socket.on("join-interview", ({ interviewId, role }) => {
 
         socket.join(interviewId);
+
+        socket.to(interviewId).emit("interview-participant-connected", {
+            socketId: socket.id,
+            role
+        });
 
         console.log(
             `Socket ${socket.id} joined interview ${interviewId}`
         );
 
+    });
+
+    socket.on("candidate-media-enabled", (interviewId) => {
+        socket.to(interviewId).emit("candidate-media-enabled");
     });
 
     socket.on("webrtc-offer", (data) => {

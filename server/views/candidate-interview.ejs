@@ -2,9 +2,24 @@
 <html>
 <head>
     <title>Candidate Interview</title>
+    <style>
+        .window-role {
+            display: inline-block;
+            margin: 16px 0 8px;
+            padding: 8px 12px;
+            border-left: 4px solid #087f8c;
+            background: #e7f6f5;
+            color: #07545b;
+            font-weight: 700;
+        }
+    </style>
 </head>
 
 <body>
+
+    <div class="window-role" role="status" aria-label="Current interview window: candidate">
+        Candidate Window
+    </div>
 
     <h1>Candidate Interview Room</h1>
 
@@ -45,71 +60,506 @@
 
     <p id="mediaStatus"></p>
 
+    <hr>
 
-    <script src="/socket.io/socket.io.js">
-        const socket = io();
+<h2>Speech to Text</h2>
 
-const interviewId = "<%= interview._id %>";
+<button id="startSpeechBtn">
+    Start Speaking
+</button>
 
-socket.on("connect", () => {
+<button id="stopSpeechBtn" disabled>
+    Stop Speaking
+</button>
 
-    console.log(
-        "Candidate connected to Socket.IO:",
-        socket.id
-    );
+<p id="speechStatus"></p>
 
-    socket.emit("join-interview", interviewId);
+<p>
+    <strong>Recognized Text:</strong>
+</p>
 
-});
-socket.on("webrtc-offer", (data) => {
+<div id="speechText"></div>
 
-    console.log("WebRTC offer received:", data);
+<h3>Candidate</h3>
 
-});
+<video
+    id="localVideo"
+    autoplay
+    muted
+    playsinline
+    width="400">
+</video>
+
+<h3>Interviewer</h3>
+
+<video
+    id="remoteVideo"
+    autoplay
+    playsinline
+    width="400">
+</video>
 
 
-    </script>
-    <script>
+    <script src="/socket.io/socket.io.js"></script>
+```html
+<script>
+    const socket = io();
 
-        const localVideo =
-            document.getElementById("localVideo");
+    const interviewId = "<%= interview._id %>";
 
-        const enableMediaBtn =
-            document.getElementById("enableMediaBtn");
+    const localVideo =
+        document.getElementById("localVideo");
 
-        const mediaStatus =
-            document.getElementById("mediaStatus");
+    const remoteVideo =
+        document.getElementById("remoteVideo");
 
-        let localStream = null;
+    const enableMediaBtn =
+        document.getElementById("enableMediaBtn");
 
-        enableMediaBtn.addEventListener("click", async () => {
+    const mediaStatus =
+        document.getElementById("mediaStatus");
+
+
+    // -------------------------
+    // WEBRTC VARIABLES
+    // -------------------------
+
+    let localStream = null;
+
+    let localStreamPromise = null;
+
+    let peerConnection = null;
+
+    let pendingIceCandidates = [];
+
+
+    // -------------------------
+    // SOCKET CONNECTION
+    // -------------------------
+
+    socket.on("connect", () => {
+
+        console.log(
+            "Candidate connected to Socket.IO:",
+            socket.id
+        );
+
+        socket.emit("join-interview", {
+            interviewId,
+            role: "candidate"
+        });
+
+    });
+
+
+    // -------------------------
+    // GET CAMERA + MICROPHONE
+    // -------------------------
+
+    async function getCandidateMedia() {
+
+        if (localStream) {
+            return localStream;
+        }
+
+        if (!navigator.mediaDevices?.getUserMedia) {
+
+            throw new Error(
+                "Camera and microphone require HTTPS or localhost."
+            );
+
+        }
+
+        if (!localStreamPromise) {
+
+            localStreamPromise =
+                navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: true
+                });
+
+        }
+
+        try {
+
+            localStream =
+                await localStreamPromise;
+
+            localVideo.srcObject =
+                localStream;
+
+            return localStream;
+
+        } finally {
+
+            localStreamPromise = null;
+
+        }
+
+    }
+
+
+    // -------------------------
+    // ENABLE CAMERA + MICROPHONE
+    // -------------------------
+
+    enableMediaBtn.addEventListener(
+        "click",
+        async () => {
+
+            enableMediaBtn.disabled = true;
 
             try {
 
-                localStream =
-                    await navigator.mediaDevices.getUserMedia({
-                        video: true,
-                        audio: true
-                    });
+                await getCandidateMedia();
 
-                localVideo.srcObject = localStream;
+                socket.emit(
+                    "candidate-media-enabled",
+                    interviewId
+                );
 
                 mediaStatus.textContent =
                     "Camera and microphone enabled.";
 
-                enableMediaBtn.disabled = true;
+                console.log(
+                    "Candidate camera and microphone enabled"
+                );
 
             } catch (error) {
 
-                console.error(error);
+                console.error(
+                    "Failed to access camera/microphone:",
+                    error
+                );
 
                 mediaStatus.textContent =
-                    "Camera or microphone permission was denied.";
+                    error.message.includes("HTTPS")
+                        ? error.message
+                        : "Camera or microphone permission was denied. Check browser permissions and that no other app is using the device.";
+
+                enableMediaBtn.disabled = false;
+
             }
 
-        });
+        }
+    );
 
-    </script>
+
+    // -------------------------
+    // RECEIVE WEBRTC OFFER
+    // -------------------------
+
+    socket.on(
+        "webrtc-offer",
+        async (data) => {
+
+            console.log(
+                "WebRTC offer received"
+            );
+
+            try {
+
+                const stream =
+                    await getCandidateMedia();
+
+
+                // Create PeerConnection
+                peerConnection =
+                    new RTCPeerConnection();
+
+
+                // -------------------------
+                // REMOTE TRACK
+                // -------------------------
+peerConnection.addEventListener("track", (event) => {
+
+    console.log("Remote track received");
+    console.log("Track kind:", event.track.kind);
+    console.log("Track enabled:", event.track.enabled);
+    console.log("Track readyState:", event.track.readyState);
+    console.log("Remote streams:", event.streams);
+
+    if (event.streams && event.streams[0]) {
+
+        remoteVideo.srcObject = event.streams[0];
+        remoteVideo.addEventListener("loadedmetadata", () => {
+    console.log("Remote video metadata loaded");
+
+    console.log("Video width:", remoteVideo.videoWidth);
+    console.log("Video height:", remoteVideo.videoHeight);
+});
+
+        console.log(
+            "Remote stream assigned:",
+            remoteVideo.srcObject
+        );
+
+        console.log(
+            "Remote video tracks:",
+            event.streams[0].getVideoTracks()
+        );
+
+        console.log(
+            "Remote audio tracks:",
+            event.streams[0].getAudioTracks()
+        );
+
+    }
+});
+
+
+                // -------------------------
+                // ICE CANDIDATE
+                // -------------------------
+
+                peerConnection.addEventListener(
+                    "icecandidate",
+                    (event) => {
+
+                        if (event.candidate) {
+
+                            socket.emit(
+                                "webrtc-ice-candidate",
+                                {
+                                    interviewId:
+                                        interviewId,
+
+                                    candidate:
+                                        event.candidate
+                                }
+                            );
+
+                            console.log(
+                                "Candidate ICE candidate sent"
+                            );
+
+                        }
+
+                    }
+                );
+
+
+                // -------------------------
+                // ADD LOCAL TRACKS
+                // -------------------------
+
+                stream
+                    .getTracks()
+                    .forEach((track) => {
+
+                        peerConnection.addTrack(
+                            track,
+                            stream
+                        );
+
+                    });
+
+
+                // -------------------------
+                // SET REMOTE DESCRIPTION
+                // -------------------------
+
+                await peerConnection
+                    .setRemoteDescription(
+                        data.offer
+                    );
+
+
+                // -------------------------
+                // ADD QUEUED ICE
+                // -------------------------
+
+                for (
+                    const candidate
+                    of pendingIceCandidates
+                ) {
+
+                    try {
+
+                        await peerConnection
+                            .addIceCandidate(
+                                candidate
+                            );
+
+                        console.log(
+                            "Queued ICE candidate added"
+                        );
+
+                    } catch (error) {
+
+                        console.error(
+                            "Failed to add queued ICE candidate:",
+                            error
+                        );
+
+                    }
+
+                }
+
+                pendingIceCandidates = [];
+
+
+                // -------------------------
+                // CREATE ANSWER
+                // -------------------------
+
+                const answer =
+                    await peerConnection
+                        .createAnswer();
+
+
+                await peerConnection
+                    .setLocalDescription(
+                        answer
+                    );
+
+
+                // -------------------------
+                // SEND ANSWER
+                // -------------------------
+
+                socket.emit(
+                    "webrtc-answer",
+                    {
+                        interviewId,
+
+                        answer:
+                            peerConnection
+                                .localDescription
+                    }
+                );
+
+                console.log(
+                    "WebRTC answer sent"
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Failed to create WebRTC answer:",
+                    error
+                );
+
+                mediaStatus.textContent =
+                    error.message;
+
+            }
+
+        }
+    );
+
+
+    // -------------------------
+    // RECEIVE ICE CANDIDATE
+    // -------------------------
+
+    socket.on(
+        "webrtc-ice-candidate",
+        async (data) => {
+
+            try {
+
+                // PeerConnection does not exist yet
+                if (!peerConnection) {
+
+                    pendingIceCandidates.push(
+                        data.candidate
+                    );
+
+                    console.log(
+                        "ICE candidate queued because peerConnection is not ready"
+                    );
+
+                    return;
+
+                }
+
+
+                // Remote description is not ready yet
+                if (
+                    !peerConnection.remoteDescription
+                ) {
+
+                    pendingIceCandidates.push(
+                        data.candidate
+                    );
+
+                    console.log(
+                        "ICE candidate queued because remote description is not ready"
+                    );
+
+                    return;
+
+                }
+
+
+                // Add ICE candidate
+                await peerConnection
+                    .addIceCandidate(
+                        data.candidate
+                    );
+
+                console.log(
+                    "Candidate ICE candidate received"
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Failed to add candidate ICE candidate:",
+                    error
+                );
+
+            }
+
+        }
+    );
+const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+console.log("SpeechRecognition:", SpeechRecognition);
+
+const recognition = new SpeechRecognition();
+
+recognition.lang = "en-US";
+recognition.continuous = false;
+recognition.interimResults = false;
+
+recognition.onstart = () => {
+    console.log("STARTED");
+};
+
+recognition.onresult = (event) => {
+
+    const text =
+        event.results[0][0].transcript;
+
+    console.log("RESULT:", text);
+};
+
+recognition.onerror = (event) => {
+
+    console.log("ERROR:", event.error);
+};
+
+recognition.onend = () => {
+
+    console.log("ENDED");
+};
+
+document
+    .getElementById("startSpeechBtn")
+    .addEventListener("click", () => {
+
+        console.log("Starting recognition...");
+
+        recognition.start();
+
+    });
+</script>
+```
+
 
 </body>
 </html>
