@@ -99,467 +99,144 @@
     width="400">
 </video>
 
+<hr>
+
+<h2>Speech to Text Test</h2>
+
+<button id="startRecordingBtn">
+    Start Recording
+</button>
+
+<button id="stopRecordingBtn" disabled>
+    Stop Recording
+</button>
+
+<p id="recordingStatus"></p>
+
+<p>
+    <strong>Transcript:</strong>
+</p>
+
+<div id="transcriptResult"></div>
+
 
     <script src="/socket.io/socket.io.js"></script>
-```html
 <script>
     const socket = io();
-
     const interviewId = "<%= interview._id %>";
 
-    const localVideo =
-        document.getElementById("localVideo");
-
-    const remoteVideo =
-        document.getElementById("remoteVideo");
-
-    const enableMediaBtn =
-        document.getElementById("enableMediaBtn");
-
-    const mediaStatus =
-        document.getElementById("mediaStatus");
-
-
-    // -------------------------
-    // WEBRTC VARIABLES
-    // -------------------------
-
-    let localStream = null;
-
-    let localStreamPromise = null;
-
-    let peerConnection = null;
-
-    let pendingIceCandidates = [];
-
-
-    // -------------------------
-    // SOCKET CONNECTION
-    // -------------------------
-
     socket.on("connect", () => {
-
-        console.log(
-            "Candidate connected to Socket.IO:",
-            socket.id
-        );
-
         socket.emit("join-interview", {
             interviewId,
             role: "candidate"
         });
-
     });
 
+    const startRecordingBtn = document.getElementById("startRecordingBtn");
+    const stopRecordingBtn = document.getElementById("stopRecordingBtn");
+    const recordingStatus = document.getElementById("recordingStatus");
+    const transcriptResult = document.getElementById("transcriptResult");
 
-    // -------------------------
-    // GET CAMERA + MICROPHONE
-    // -------------------------
+    let mediaRecorder;
+    let recordingStream = null;
+    let audioChunks = [];
 
-    async function getCandidateMedia() {
-
-        if (localStream) {
-            return localStream;
-        }
-
-        if (!navigator.mediaDevices?.getUserMedia) {
-
-            throw new Error(
-                "Camera and microphone require HTTPS or localhost."
-            );
-
-        }
-
-        if (!localStreamPromise) {
-
-            localStreamPromise =
-                navigator.mediaDevices.getUserMedia({
-                    video: true,
-                    audio: true
-                });
-
-        }
-
+    startRecordingBtn.addEventListener("click", async () => {
         try {
+            recordingStream = await navigator.mediaDevices.getUserMedia({
+                audio: true
+            });
 
-            localStream =
-                await localStreamPromise;
+            const options = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+                ? { mimeType: "audio/webm;codecs=opus" }
+                : {};
 
-            localVideo.srcObject =
-                localStream;
+            mediaRecorder = new MediaRecorder(recordingStream, options);
+            audioChunks = [];
 
-            return localStream;
+            console.log("Recording format:", mediaRecorder.mimeType);
 
-        } finally {
+            mediaRecorder.addEventListener("dataavailable", (event) => {
+                if (event.data.size > 0) {
+                    audioChunks.push(event.data);
+                }
+            });
 
-            localStreamPromise = null;
+            mediaRecorder.addEventListener("stop", async () => {
+                try {
+                    recordingStatus.textContent = "Sending audio for transcription...";
 
-        }
-
-    }
-
-
-    // -------------------------
-    // ENABLE CAMERA + MICROPHONE
-    // -------------------------
-
-    enableMediaBtn.addEventListener(
-        "click",
-        async () => {
-
-            enableMediaBtn.disabled = true;
-
-            try {
-
-                await getCandidateMedia();
-
-                socket.emit(
-                    "candidate-media-enabled",
-                    interviewId
-                );
-
-                mediaStatus.textContent =
-                    "Camera and microphone enabled.";
-
-                console.log(
-                    "Candidate camera and microphone enabled"
-                );
-
-            } catch (error) {
-
-                console.error(
-                    "Failed to access camera/microphone:",
-                    error
-                );
-
-                mediaStatus.textContent =
-                    error.message.includes("HTTPS")
-                        ? error.message
-                        : "Camera or microphone permission was denied. Check browser permissions and that no other app is using the device.";
-
-                enableMediaBtn.disabled = false;
-
-            }
-
-        }
-    );
-
-
-    // -------------------------
-    // RECEIVE WEBRTC OFFER
-    // -------------------------
-
-    socket.on(
-        "webrtc-offer",
-        async (data) => {
-
-            console.log(
-                "WebRTC offer received"
-            );
-
-            try {
-
-                const stream =
-                    await getCandidateMedia();
-
-
-                // Create PeerConnection
-                peerConnection =
-                    new RTCPeerConnection();
-
-
-                // -------------------------
-                // REMOTE TRACK
-                // -------------------------
-peerConnection.addEventListener("track", (event) => {
-
-    console.log("Remote track received");
-    console.log("Track kind:", event.track.kind);
-    console.log("Track enabled:", event.track.enabled);
-    console.log("Track readyState:", event.track.readyState);
-    console.log("Remote streams:", event.streams);
-
-    if (event.streams && event.streams[0]) {
-
-        remoteVideo.srcObject = event.streams[0];
-        remoteVideo.addEventListener("loadedmetadata", () => {
-    console.log("Remote video metadata loaded");
-
-    console.log("Video width:", remoteVideo.videoWidth);
-    console.log("Video height:", remoteVideo.videoHeight);
-});
-
-        console.log(
-            "Remote stream assigned:",
-            remoteVideo.srcObject
-        );
-
-        console.log(
-            "Remote video tracks:",
-            event.streams[0].getVideoTracks()
-        );
-
-        console.log(
-            "Remote audio tracks:",
-            event.streams[0].getAudioTracks()
-        );
-
-    }
-});
-
-
-                // -------------------------
-                // ICE CANDIDATE
-                // -------------------------
-
-                peerConnection.addEventListener(
-                    "icecandidate",
-                    (event) => {
-
-                        if (event.candidate) {
-
-                            socket.emit(
-                                "webrtc-ice-candidate",
-                                {
-                                    interviewId:
-                                        interviewId,
-
-                                    candidate:
-                                        event.candidate
-                                }
-                            );
-
-                            console.log(
-                                "Candidate ICE candidate sent"
-                            );
-
-                        }
-
+                    const audioBlob = new Blob(audioChunks, {
+                        type: mediaRecorder.mimeType
+                    });
+                    console.log("Audio chunks:", audioChunks.length);
+console.log("Audio blob size:", audioBlob.size);
+console.log("Audio blob type:", audioBlob.type);
+                    if (audioBlob.size === 0) {
+                        throw new Error("Recording did not contain any audio data");
                     }
-                );
 
+                    const formData = new FormData();
+                    formData.append("audio", audioBlob, "recording.webm");
 
-                // -------------------------
-                // ADD LOCAL TRACKS
-                // -------------------------
+                    const response = await fetch("/transcribe-audio", {
+                        method: "POST",
+                        body: formData
+                    });
+                    const result = await response.json();
 
-                stream
-                    .getTracks()
-                    .forEach((track) => {
+                    if (!response.ok) {
+                        throw new Error(result.error || "Transcription failed");
+                    }
 
-                        peerConnection.addTrack(
-                            track,
-                            stream
-                        );
+                    console.log("Transcript received:", result.transcript);
+                    transcriptResult.textContent = result.transcript;
 
+                    socket.emit("transcript", {
+                        interviewId: interviewId,
+                        text: result.transcript,
+                        speaker: "candidate"
                     });
 
-
-                // -------------------------
-                // SET REMOTE DESCRIPTION
-                // -------------------------
-
-                await peerConnection
-                    .setRemoteDescription(
-                        data.offer
-                    );
-
-
-                // -------------------------
-                // ADD QUEUED ICE
-                // -------------------------
-
-                for (
-                    const candidate
-                    of pendingIceCandidates
-                ) {
-
-                    try {
-
-                        await peerConnection
-                            .addIceCandidate(
-                                candidate
-                            );
-
-                        console.log(
-                            "Queued ICE candidate added"
-                        );
-
-                    } catch (error) {
-
-                        console.error(
-                            "Failed to add queued ICE candidate:",
-                            error
-                        );
-
+                    recordingStatus.textContent = "Transcription completed.";
+                } catch (error) {
+                    console.error("Transcription error:", error);
+                    recordingStatus.textContent = "Transcription failed.";
+                } finally {
+                    if (recordingStream) {
+                        recordingStream.getTracks().forEach((track) => track.stop());
+                        recordingStream = null;
                     }
 
+                    startRecordingBtn.disabled = false;
+                    stopRecordingBtn.disabled = true;
                 }
+            });
 
-                pendingIceCandidates = [];
+            mediaRecorder.start();
+            recordingStatus.textContent = "Recording...";
+            startRecordingBtn.disabled = true;
+            stopRecordingBtn.disabled = false;
+        } catch (error) {
+            console.error("Microphone error:", error);
+            recordingStatus.textContent = "Could not access microphone.";
 
-
-                // -------------------------
-                // CREATE ANSWER
-                // -------------------------
-
-                const answer =
-                    await peerConnection
-                        .createAnswer();
-
-
-                await peerConnection
-                    .setLocalDescription(
-                        answer
-                    );
-
-
-                // -------------------------
-                // SEND ANSWER
-                // -------------------------
-
-                socket.emit(
-                    "webrtc-answer",
-                    {
-                        interviewId,
-
-                        answer:
-                            peerConnection
-                                .localDescription
-                    }
-                );
-
-                console.log(
-                    "WebRTC answer sent"
-                );
-
-            } catch (error) {
-
-                console.error(
-                    "Failed to create WebRTC answer:",
-                    error
-                );
-
-                mediaStatus.textContent =
-                    error.message;
-
+            if (recordingStream) {
+                recordingStream.getTracks().forEach((track) => track.stop());
+                recordingStream = null;
             }
-
         }
-    );
-
-
-    // -------------------------
-    // RECEIVE ICE CANDIDATE
-    // -------------------------
-
-    socket.on(
-        "webrtc-ice-candidate",
-        async (data) => {
-
-            try {
-
-                // PeerConnection does not exist yet
-                if (!peerConnection) {
-
-                    pendingIceCandidates.push(
-                        data.candidate
-                    );
-
-                    console.log(
-                        "ICE candidate queued because peerConnection is not ready"
-                    );
-
-                    return;
-
-                }
-
-
-                // Remote description is not ready yet
-                if (
-                    !peerConnection.remoteDescription
-                ) {
-
-                    pendingIceCandidates.push(
-                        data.candidate
-                    );
-
-                    console.log(
-                        "ICE candidate queued because remote description is not ready"
-                    );
-
-                    return;
-
-                }
-
-
-                // Add ICE candidate
-                await peerConnection
-                    .addIceCandidate(
-                        data.candidate
-                    );
-
-                console.log(
-                    "Candidate ICE candidate received"
-                );
-
-            } catch (error) {
-
-                console.error(
-                    "Failed to add candidate ICE candidate:",
-                    error
-                );
-
-            }
-
-        }
-    );
-const SpeechRecognition =
-    window.SpeechRecognition ||
-    window.webkitSpeechRecognition;
-
-console.log("SpeechRecognition:", SpeechRecognition);
-
-const recognition = new SpeechRecognition();
-
-recognition.lang = "en-US";
-recognition.continuous = false;
-recognition.interimResults = false;
-
-recognition.onstart = () => {
-    console.log("STARTED");
-};
-
-recognition.onresult = (event) => {
-
-    const text =
-        event.results[0][0].transcript;
-
-    console.log("RESULT:", text);
-};
-
-recognition.onerror = (event) => {
-
-    console.log("ERROR:", event.error);
-};
-
-recognition.onend = () => {
-
-    console.log("ENDED");
-};
-
-document
-    .getElementById("startSpeechBtn")
-    .addEventListener("click", () => {
-
-        console.log("Starting recognition...");
-
-        recognition.start();
-
     });
-</script>
-```
 
+    stopRecordingBtn.addEventListener("click", () => {
+        if (mediaRecorder && mediaRecorder.state !== "inactive") {
+            mediaRecorder.stop();
+            recordingStatus.textContent = "Processing audio...";
+            stopRecordingBtn.disabled = true;
+        }
+    });
+
+</script>
 
 </body>
 </html>

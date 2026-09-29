@@ -30,16 +30,21 @@ const dashboardRoutes=require("./routes/dashboardRoutes");
 const jobRoutes=require("./routes/jobRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
 const Transcript = require("./models/Transcripts");
+const voskTestRoutes = require("./routes/voskTestRoutes");
+const speechRoutes = require("./routes/speechRoutes");
+
 
 app.get("/", (req, res) => {
     res.render("login");
 });
-
+app.use("/", voskTestRoutes);
 app.use("/", authRoutes);
 app.use("/",interviewRoutes);
 app.use("/", dashboardRoutes);
 app.use("/",jobRoutes);
 app.use("/",applicationRoutes);
+app.use("/", speechRoutes);
+
 
 io.on("connection", (socket) => {
 
@@ -97,15 +102,13 @@ socket.on("webrtc-ice-candidate", (data) => {
 
 });
 
-
 socket.on("transcript", async (data) => {
 
     try {
 
-        console.log(
-            "Transcript received:",
-            data.text
-        );
+        console.log("Transcript received from:", socket.id);
+        console.log("Interview ID:", data.interviewId);
+        console.log("Transcript:", data.text);
 
         const transcript = new Transcript({
             interview: data.interviewId,
@@ -115,21 +118,20 @@ socket.on("transcript", async (data) => {
 
         await transcript.save();
 
-        io.to(data.interviewId).emit(
-            "transcript",
-            {
-                text: transcript.text,
-                speaker: transcript.speaker,
-                timestamp: transcript.timestamp
-            }
+        console.log(
+            "Broadcasting transcript to room:",
+            data.interviewId
         );
+
+        io.to(data.interviewId).emit("transcript", {
+            text: transcript.text,
+            speaker: transcript.speaker,
+            timestamp: transcript.timestamp
+        });
 
     } catch (err) {
 
-        console.log(
-            "Failed to save transcript:",
-            err
-        );
+        console.log("Failed to save transcript:", err);
 
     }
 
