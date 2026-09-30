@@ -156,6 +156,15 @@
 </div>
 <br>
 
+<hr>
+
+<h2>AI Follow-up Questions</h2>
+
+<div id="follow-up-questions">
+    <p>No follow-up questions yet.</p>
+</div>
+
+
 <input
     type="text"
     id="transcriptInput"
@@ -456,6 +465,30 @@ socket.on("transcript", (data) => {
         `${data.speaker}: ${data.text}`;
 
     transcript.appendChild(paragraph);
+
+});
+
+socket.on("follow-up-questions", (data) => {
+
+    console.log(
+        "INTERVIEWER RECEIVED FOLLOW-UP QUESTIONS:",
+        data.questions
+    );
+
+    const container = document.getElementById("follow-up-questions");
+
+    container.innerHTML = "";
+
+    const questions = data.questions.split("\n");
+
+    questions.forEach(question => {
+
+        const paragraph = document.createElement("p");
+
+        paragraph.textContent = question;
+
+        container.appendChild(paragraph);
+    });
 
 });
 

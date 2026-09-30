@@ -1,0 +1,4 @@
+netstat -ano | findstr :5000
+taskkill /PID <PID_FROM_ABOVE> /F
+netstat -ano | findstr :5000
+npm run dev

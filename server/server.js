@@ -32,7 +32,7 @@ const applicationRoutes = require("./routes/applicationRoutes");
 const Transcript = require("./models/Transcripts");
 const voskTestRoutes = require("./routes/voskTestRoutes");
 const speechRoutes = require("./routes/speechRoutes");
-
+const { generateFollowUpQuestions } = require("./services/geminiService");
 
 app.get("/", (req, res) => {
     res.render("login");
@@ -122,21 +122,45 @@ socket.on("transcript", async (data) => {
             "Broadcasting transcript to room:",
             data.interviewId
         );
+io.to(data.interviewId).emit("transcript", {
+    text: transcript.text,
+    speaker: transcript.speaker,
+    timestamp: transcript.timestamp
+});
 
-        io.to(data.interviewId).emit("transcript", {
-            text: transcript.text,
-            speaker: transcript.speaker,
-            timestamp: transcript.timestamp
-        });
+try {
+
+    const followUpQuestions =
+        await generateFollowUpQuestions(transcript.text);
+
+    console.log(
+        "Gemini follow-up questions:",
+        followUpQuestions
+    );
+
+    io.to(data.interviewId).emit(
+        "follow-up-questions",
+        {
+            questions: followUpQuestions
+        }
+    );
+
+} catch (aiError) {
+
+    console.log(
+        "Gemini follow-up generation failed:",
+        aiError
+    );
+
+}
 
     } catch (err) {
 
-        console.log("Failed to save transcript:", err);
+        console.log("Failedto save transcript:", err);
 
     }
 
 });
-
 
 
     socket.on("disconnect", () => {
