@@ -4,8 +4,10 @@ const Job=require("../models/Job");
 const Transcript=require("../models/Transcripts");
 const Note=require("../models/Note");
 const Evaluation = require("../models/Evaluation");
-
-
+const Summary=require("../models/Summary")
+const {
+    generateInterviewSummary
+} = require("../services/geminiService");
 const mongoose=require("mongoose");
 
 
@@ -524,6 +526,96 @@ res.redirect(`/interview-room/${interview._id}/evaluation`);
     }
 };
 
+const generateSummary = async (req, res) => {
+    try {
+        if (!mongoose.isValidObjectId(req.params.interviewId)) {
+            return res.status(404).send("Interview not found");
+        }
+
+        const interview = await Interview.findById(req.params.interviewId)
+            .populate({
+                path: "application",
+                populate: {
+                    path: "job",
+                    select: "createdBy"
+                }
+            });
+
+        if (!interview) {
+            return res.status(404).send("Interview not found");
+        }
+
+        if (
+            !isOwnedBy(interview.interviewer, req.user.userId) ||
+            !interview.application ||
+            !interview.application.job ||
+            !isOwnedBy(
+                interview.application.job.createdBy,
+                req.user.userId
+            )
+        ) {
+            return res.status(403).send(
+                "You are not authorized to generate this summary"
+            );
+        }
+
+        if (interview.status !== "completed") {
+            return res.send(
+                "Summary can only be generated after the interview is completed"
+            );
+        }
+
+        const transcripts = await Transcript.find({
+            interview: interview._id
+        }).sort({ timestamp: 1 });
+
+        const notes = await Note.find({
+            interview: interview._id,
+            interviewer: req.user.userId
+        }).sort({ createdAt: 1 });
+
+        const evaluation = await Evaluation.findOne({
+            interview: interview._id
+        });
+
+        if (!evaluation) {
+            return res.send(
+                "Please complete the evaluation before generating the summary"
+            );
+        }
+
+        const summaryText = await generateInterviewSummary(
+            transcripts,
+            notes,
+            evaluation
+        );
+
+        await Summary.findOneAndUpdate(
+            { interview: interview._id },
+            {
+                $set: {
+                    interviewer: req.user.userId,
+                    strengths: summaryText,
+                    weaknesses: "",
+                    technicalAssessment: "",
+                    overallAssessment: "",
+                    recommendation: ""
+                }
+            },
+            {
+                new: true,
+                upsert: true,
+                setDefaultsOnInsert: true
+            }
+        );
+
+        res.send("Interview summary generated successfully");
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to generate interview summary");
+    }
+};
 
 module.exports = {
     showCreateInterview,
@@ -536,5 +628,6 @@ module.exports = {
     saveNote,
     endInterview,
     showEvaluationForm,
-    saveEvaluation
+    saveEvaluation,
+    generateSummary
 };

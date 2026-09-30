@@ -144,6 +144,15 @@
     <a href="/interview-room/<%= interview._id %>/evaluation">
         Evaluate Interview
     </a>
+    <form
+    action="/interview-room/<%= interview._id %>/generate-summary"
+    method="POST"
+>
+    <button type="submit">
+        Generate AI Summary
+    </button>
+</form>
+
 
 <% } else if (interview.status === "cancelled") { %>
 
