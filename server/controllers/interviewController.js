@@ -3,6 +3,8 @@ const Application=require("../models/Application");
 const Job=require("../models/Job");
 const Transcript=require("../models/Transcripts");
 const Note=require("../models/Note");
+const Evaluation = require("../models/Evaluation");
+
 
 const mongoose=require("mongoose");
 
@@ -393,6 +395,136 @@ const endInterview = async (req, res) => {
     }
 };
 
+const showEvaluationForm = async (req, res) => {
+    try {
+        if (!mongoose.isValidObjectId(req.params.interviewId)) {
+            return res.status(404).send("Interview not found");
+        }
+
+        const interview = await Interview.findById(req.params.interviewId)
+            .populate({
+                path: "application",
+                populate: [
+                    {
+                        path: "candidate",
+                        select: "name email"
+                    },
+                    {
+                        path: "job",
+                        select: "title createdBy"
+                    }
+                ]
+            });
+
+        if (!interview) {
+            return res.status(404).send("Interview not found");
+        }
+
+        if (
+            !isOwnedBy(interview.interviewer, req.user.userId) ||
+            !interview.application ||
+            !interview.application.job ||
+            !isOwnedBy(
+                interview.application.job.createdBy,
+                req.user.userId
+            )
+        ) {
+            return res.status(403).send(
+                "You are not authorized for this evaluation"
+            );
+        }
+
+        if (interview.status !== "completed") {
+            return res.send(
+                "Evaluation is available only after the interview is completed"
+            );
+        }
+
+        res.render("evaluation", {
+            interview
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to load evaluation");
+    }
+};
+
+const saveEvaluation = async (req, res) => {
+    try {
+        if (!mongoose.isValidObjectId(req.params.interviewId)) {
+            return res.status(404).send("Interview not found");
+        }
+
+        const interview = await Interview.findById(req.params.interviewId)
+            .populate({
+                path: "application",
+                populate: {
+                    path: "job",
+                    select: "createdBy"
+                }
+            });
+
+        if (!interview) {
+            return res.status(404).send("Interview not found");
+        }
+
+        if (
+            !isOwnedBy(interview.interviewer, req.user.userId) ||
+            !interview.application ||
+            !interview.application.job ||
+            !isOwnedBy(
+                interview.application.job.createdBy,
+                req.user.userId
+            )
+        ) {
+            return res.status(403).send(
+                "You are not authorized to save this evaluation"
+            );
+        }
+
+        if (interview.status !== "completed") {
+            return res.send(
+                "Evaluation can only be saved after the interview is completed"
+            );
+        }
+
+        const {
+            technicalSkills,
+            communication,
+            problemSolving,
+            overallRating,
+            comments
+        } = req.body;
+
+        await Evaluation.findOneAndUpdate(
+            { interview: interview._id },
+            {
+                $set: {
+                    interviewer: req.user.userId,
+                    technicalSkills,
+                    communication,
+                    problemSolving,
+                    overallRating,
+                    comments
+                }
+            },
+            {
+                new: true,
+                upsert: true,
+                runValidators: true,
+                setDefaultsOnInsert: true
+            }
+        );
+
+res.redirect(`/interview-room/${interview._id}/evaluation`);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to save evaluation");
+    }
+};
+
+
 module.exports = {
     showCreateInterview,
     createInterview,
@@ -402,5 +534,7 @@ module.exports = {
     startInterview,
     showCandidateInterviewRoom,
     saveNote,
-    endInterview
+    endInterview,
+    showEvaluationForm,
+    saveEvaluation
 };

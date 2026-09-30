@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Evaluation</title>
+</head>
+
+<body>
+
+    <h1>Interview Evaluation</h1>
+
+    <hr>
+
+    <h2>Candidate</h2>
+
+    <p>
+        <strong>Name:</strong>
+        <%= interview.application.candidate.name %>
+    </p>
+
+    <p>
+        <strong>Email:</strong>
+        <%= interview.application.candidate.email %>
+    </p>
+
+    <h2>Position</h2>
+
+    <p>
+        <%= interview.application.job.title %>
+    </p>
+
+    <hr>
+
+    <form
+        method="POST"
+        action="/interview-room/<%= interview._id %>/evaluation"
+    >
+
+        <h3>Technical Skills</h3>
+
+        <select name="technicalSkills" required>
+            <option value="">Select rating</option>
+            <option value="1">1 - Poor</option>
+            <option value="2">2 - Below Average</option>
+            <option value="3">3 - Average</option>
+            <option value="4">4 - Good</option>
+            <option value="5">5 - Excellent</option>
+        </select>
+
+        <h3>Communication</h3>
+
+        <select name="communication" required>
+            <option value="">Select rating</option>
+            <option value="1">1 - Poor</option>
+            <option value="2">2 - Below Average</option>
+            <option value="3">3 - Average</option>
+            <option value="4">4 - Good</option>
+            <option value="5">5 - Excellent</option>
+        </select>
+
+        <h3>Problem Solving</h3>
+
+        <select name="problemSolving" required>
+            <option value="">Select rating</option>
+            <option value="1">1 - Poor</option>
+            <option value="2">2 - Below Average</option>
+            <option value="3">3 - Average</option>
+            <option value="4">Good</option>
+            <option value="5">Excellent</option>
+        </select>
+
+        <h3>Overall Rating</h3>
+
+        <select name="overallRating" required>
+            <option value="">Select rating</option>
+            <option value="1">1 - Poor</option>
+            <option value="2">2 - Below Average</option>
+            <option value="3">3 - Average</option>
+            <option value="4">4 - Good</option>
+            <option value="5">5 - Excellent</option>
+        </select>
+
+        <h3>Comments</h3>
+
+        <textarea
+            name="comments"
+            rows="6"
+            cols="60"
+            placeholder="Write your overall interview comments..."
+        ></textarea>
+
+        <br><br>
+
+        <button type="submit">
+            Save Evaluation
+        </button>
+
+    </form>
+
+</body>
+
+</html>
