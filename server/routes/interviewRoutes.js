@@ -1,6 +1,6 @@
 const express=require("express");
 
-const {showCreateInterview,createInterview,showSchedulePage,scheduleInterview, showInterviewRoom,startInterview,showCandidateInterviewRoom}=require("../controllers/interviewController");
+const {showCreateInterview,createInterview,showSchedulePage,scheduleInterview, showInterviewRoom,startInterview,showCandidateInterviewRoom,saveNote,endInterview}=require("../controllers/interviewController");
 
 const protect=require("../middleware/authMiddleware");
 
@@ -28,4 +28,18 @@ router.post(
 router.get("/candidate-interview/:interviewId",
     protect,
     showCandidateInterviewRoom);
+
+router.post(
+    "/interview-room/:interviewId/note",
+    protect,
+    saveNote
+);
+
+router.post(
+    "/interview-room/:interviewId/end",
+    protect,
+    endInterview
+);
+
+
 module.exports=router;

@@ -16,7 +16,7 @@ const createJob = async (req, res) => {
 
         await job.save();
 
-        res.redirect("/jobs");
+res.redirect("/dashboard");
 
     } catch (error) {
         console.error(error);

@@ -2,7 +2,10 @@ const Interview = require("../models/Interview");
 const Application=require("../models/Application");
 const Job=require("../models/Job");
 const Transcript=require("../models/Transcripts");
+const Note=require("../models/Note");
+
 const mongoose=require("mongoose");
+
 
 const isOwnedBy = (ownerId, userId) =>
     ownerId && ownerId.toString() === userId.toString();
@@ -158,11 +161,16 @@ const showInterviewRoom = async (req, res) => {
     interview: interview._id
 }).sort({ timestamp: 1 });
 
-      res.render("interview-room", {
-    interview: interview,
-    transcripts: transcripts
-});
+        const notes = await Note.find({
+            interview: interview._id,
+            interviewer: req.user.userId
+        }).sort({ createdAt: 1 });
 
+res.render("interview-room", {
+    interview: interview,
+    transcripts: transcripts,
+    notes: notes
+});
     } catch (err) {
         console.log(err);
         res.status(500).send("Failed to load interview room");
@@ -271,7 +279,119 @@ if (interview.status !== "scheduled") {
     }
 };
 
+const saveNote = async (req, res) => {
+    try {
+        if (!mongoose.isValidObjectId(req.params.interviewId)) {
+            return res.status(404).send("Interview not found");
+        }
 
+        const interview = await Interview.findById(req.params.interviewId)
+            .populate({
+                path: "application",
+                populate: {
+                    path: "job",
+                    select: "createdBy"
+                }
+            });
+
+        if (!interview) {
+            return res.status(404).send("Interview not found");
+        }
+
+        if (
+            !isOwnedBy(interview.interviewer, req.user.userId) ||
+            !interview.application ||
+            !interview.application.job ||
+            !isOwnedBy(
+                interview.application.job.createdBy,
+                req.user.userId
+            )
+        ) {
+            return res.status(403).send(
+                "You are not authorized to add notes to this interview"
+            );
+        }
+
+        const { text } = req.body;
+
+        if (!text || !text.trim()) {
+            return res.status(400).send("Note cannot be empty");
+        }
+
+        const note = new Note({
+            interview: interview._id,
+            interviewer: req.user.userId,
+            text: text.trim()
+        });
+        const notes = await Note.find({
+    interview: interview._id,
+    interviewer: req.user.userId
+}).sort({ createdAt: 1 });
+
+const transcripts = await Transcript.find({
+    interview: interview._id
+}).sort({ timestamp: 1 });
+
+
+        await note.save();
+
+        res.redirect(`/interview-room/${interview._id}`);
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to save note");
+    }
+};
+
+
+const endInterview = async (req, res) => {
+    try {
+        if (!mongoose.isValidObjectId(req.params.interviewId)) {
+            return res.status(404).send("Interview not found");
+        }
+
+        const interview = await Interview.findById(req.params.interviewId)
+            .populate({
+                path: "application",
+                populate: {
+                    path: "job",
+                    select: "createdBy"
+                }
+            });
+
+        if (!interview) {
+            return res.status(404).send("Interview not found");
+        }
+
+        if (
+            !isOwnedBy(interview.interviewer, req.user.userId) ||
+            !interview.application ||
+            !interview.application.job ||
+            !isOwnedBy(
+                interview.application.job.createdBy,
+                req.user.userId
+            )
+        ) {
+            return res.status(403).send(
+                "You are not authorized to end this interview"
+            );
+        }
+
+        if (interview.status !== "ongoing") {
+            return res.send("Interview is not currently ongoing");
+        }
+
+        interview.status = "completed";
+
+        await interview.save();
+
+        res.redirect(`/interview-room/${interview._id}`);
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to end interview");
+    }
+};
 
 module.exports = {
     showCreateInterview,
@@ -280,5 +400,7 @@ module.exports = {
     scheduleInterview,
     showInterviewRoom,
     startInterview,
-    showCandidateInterviewRoom
+    showCandidateInterviewRoom,
+    saveNote,
+    endInterview
 };

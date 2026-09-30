@@ -128,6 +128,14 @@
     <p>
         The interview has started successfully.
     </p>
+<form
+    action="/interview-room/<%= interview._id %>/end"
+    method="POST"
+>
+    <button type="submit">
+        End Interview
+    </button>
+</form>
 
 <% } else if (interview.status === "completed") { %>
 
@@ -163,7 +171,47 @@
 <div id="follow-up-questions">
     <p>No follow-up questions yet.</p>
 </div>
+<hr>
 
+<h2>Interviewer Notes</h2>
+
+<form method="POST" action="/interview-room/<%= interview._id %>/note">
+
+    <textarea
+        name="text"
+        rows="5"
+        cols="60"
+        placeholder="Write your notes about the candidate..."
+        required
+    ></textarea>
+
+    <br><br>
+
+    <button type="submit">Save Note</button>
+
+</form>
+
+<h3>Previous Notes</h3>
+
+<div id="notes">
+
+    <% if (notes && notes.length > 0) { %>
+
+        <% notes.forEach(note => { %>
+
+            <p>
+                <%= note.text %>
+            </p>
+
+        <% }) %>
+
+    <% } else { %>
+
+        <p>No notes yet.</p>
+
+    <% } %>
+
+</div>
 
 <input
     type="text"
@@ -724,6 +772,7 @@ peerConnection.addEventListener("track", (event) => {
 
         }
     );
+
 
 </script>
 
