@@ -1,36 +1,85 @@
-<form action="/register" method="POST">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create an Account - InterviewPilot</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/register.css">
+</head>
+<body class="ip-auth-page">
 
-    <input
-        type="text"
-        name="name"
-        placeholder="Name"
-        required
-    >
+    <div class="ip-auth-container">
+        <div class="ip-auth-card">
+            <div class="ip-auth-header">
+                <div class="ip-auth-logo">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                    </svg>
+                </div>
+                <h1 class="ip-auth-title">Create your account</h1>
+                <p class="ip-auth-subtitle">Join InterviewPilot to streamline your interview experience</p>
+            </div>
 
-    <input
-        type="email"
-        name="email"
-        placeholder="Email"
-        required
-    >
+            <form class="ip-auth-form" action="/register" method="POST">
+                <div class="ip-form-group">
+                    <label class="ip-form-label" for="name">Full Name</label>
+                    <input
+                        id="name"
+                        class="ip-input"
+                        type="text"
+                        name="name"
+                        placeholder="Alex Morgan"
+                        autocomplete="name"
+                        required
+                    >
+                </div>
 
-    <input
-        type="password"
-        name="password"
-        placeholder="Password"
-        required
-    >
+                <div class="ip-form-group">
+                    <label class="ip-form-label" for="email">Work Email</label>
+                    <input
+                        id="email"
+                        class="ip-input"
+                        type="email"
+                        name="email"
+                        placeholder="alex@example.com"
+                        autocomplete="email"
+                        required
+                    >
+                </div>
 
-    <label>Account Type</label>
+                <div class="ip-form-group">
+                    <label class="ip-form-label" for="password">Password</label>
+                    <input
+                        id="password"
+                        class="ip-input"
+                        type="password"
+                        name="password"
+                        placeholder="At least 8 characters"
+                        autocomplete="new-password"
+                        required
+                    >
+                </div>
 
-    <select name="role" required>
-        <option value="">Select account type</option>
-        <option value="candidate">Candidate</option>
-        <option value="interviewer">Interviewer</option>
-    </select>
+                <div class="ip-form-group">
+                    <label class="ip-form-label" for="role">Account Type</label>
+                    <select id="role" class="ip-select" name="role" required>
+                        <option value="">Select your role</option>
+                        <option value="candidate">Candidate (Applying for roles)</option>
+                        <option value="interviewer">Interviewer (Hiring & Evaluating)</option>
+                    </select>
+                </div>
 
-    <button type="submit">Register</button>
+                <button class="ip-btn ip-btn-primary ip-btn-lg ip-btn-block" type="submit">
+                    Get Started
+                </button>
+            </form>
 
-</form>
+            <div class="ip-auth-footer">
+                Already have an account? <a href="/">Sign In</a>
+            </div>
+        </div>
+    </div>
 
-<a href="/">Already have an account? Login</a>
+</body>
+</html>

@@ -1,75 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>AI Interview Summary</title>
+    <title>AI Interview Summary - InterviewPilot</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/interview-summary.css">
 </head>
-
 <body>
 
-    <h1>AI Interview Summary</h1>
+    <!-- Global Navigation -->
+    <header class="ip-navbar">
+        <div class="ip-container ip-navbar-inner">
+            <a href="/dashboard" class="ip-brand">
+                <div class="ip-brand-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <span>Interview<span class="ip-brand-accent">Pilot</span></span>
+            </a>
 
-    <hr>
+            <nav>
+                <ul class="ip-nav-links">
+                    <li><a href="/dashboard" class="ip-nav-link">Dashboard</a></li>
+                    <li><a href="/jobs" class="ip-nav-link active">Hiring Roles</a></li>
+                    <li><a href="/available-jobs" class="ip-nav-link">Available Jobs</a></li>
+                    <li><a href="/my-applications" class="ip-nav-link">My Applications</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-    <h2>Candidate</h2>
+    <main class="ip-page-wrapper">
+        <div class="ip-container ip-summary-container">
 
-    <p>
-        <strong>Name:</strong>
-        <%= interview.application.candidate.name %>
-    </p>
+            <!-- Hero Context Card -->
+            <div class="ip-summary-header-card">
+                <div>
+                    <span class="ip-badge" style="background: rgba(255, 255, 255, 0.2); color: #FFFFFF; margin-bottom: 0.5rem;">
+                        Gemini AI Assessment
+                    </span>
+                    <h1>AI Interview Summary</h1>
+                    <div class="ip-summary-candidate-meta">
+                        <span><strong>Candidate:</strong> <%= interview.application && interview.application.candidate ? interview.application.candidate.name : 'Candidate' %></span>
+                        <span> • </span>
+                        <span><strong>Position:</strong> <%= interview.application && interview.application.job ? interview.application.job.title : 'Position' %></span>
+                    </div>
+                </div>
 
-    <p>
-        <strong>Email:</strong>
-        <%= interview.application.candidate.email %>
-    </p>
+                <div>
+                    <a href="/interview-room/<%= interview._id %>" class="ip-btn ip-btn-secondary ip-btn-sm" style="background: rgba(255, 255, 255, 0.15); color: #FFFFFF; border-color: rgba(255, 255, 255, 0.3);">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Back to Interview
+                    </a>
+                </div>
+            </div>
 
-    <h2>Position</h2>
+            <!-- Analysis Structured Cards -->
+            <div class="ip-analysis-grid">
 
-    <p>
-        <%= interview.application.job.title %>
-    </p>
+                <!-- Strengths -->
+                <div class="ip-analysis-card">
+                    <div class="ip-analysis-card-header ip-header-strengths">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Candidate Strengths
+                    </div>
+                    <div class="ip-analysis-card-body">
+                        <%= summary.strengths %>
+                    </div>
+                </div>
 
-    <hr>
+                <!-- Weaknesses / Growth Areas -->
+                <div class="ip-analysis-card">
+                    <div class="ip-analysis-card-header ip-header-weaknesses">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        Areas for Growth & Potential Gaps
+                    </div>
+                    <div class="ip-analysis-card-body">
+                        <%= summary.weaknesses %>
+                    </div>
+                </div>
 
-    <h2>Strengths</h2>
+                <!-- Technical Assessment -->
+                <div class="ip-analysis-card">
+                    <div class="ip-analysis-card-header ip-header-technical">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                        </svg>
+                        Technical Competency Assessment
+                    </div>
+                    <div class="ip-analysis-card-body">
+                        <%= summary.technicalAssessment %>
+                    </div>
+                </div>
 
-    <p>
-        <%= summary.strengths %>
-    </p>
+                <!-- Overall Assessment -->
+                <div class="ip-analysis-card">
+                    <div class="ip-analysis-card-header ip-header-overall">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        Overall Candidate Synthesis
+                    </div>
+                    <div class="ip-analysis-card-body">
+                        <%= summary.overallAssessment %>
+                    </div>
+                </div>
 
-    <h2>Weaknesses</h2>
+                <!-- AI Recommendation -->
+                <div class="ip-recommendation-box">
+                    <div style="font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; color: #7E22CE; letter-spacing: 0.05em; margin-bottom: 0.375rem;">
+                        Synthesized Recommendation
+                    </div>
+                    <div style="font-size: 1.125rem; font-weight: 600; color: #581C87; line-height: 1.6;">
+                        <%= summary.recommendation %>
+                    </div>
+                </div>
 
-    <p>
-        <%= summary.weaknesses %>
-    </p>
+            </div>
 
-    <h2>Technical Assessment</h2>
+            <!-- AI Assistive Disclaimer -->
+            <div class="ip-disclaimer-box">
+                <strong>Decision Support Note:</strong> This summary is generated by AI based on live speech-to-text transcript data and interviewer inputs. Final hiring decisions should always be made holistically by human hiring managers.
+            </div>
 
-    <p>
-        <%= summary.technicalAssessment %>
-    </p>
+            <div style="margin-top: 2rem; display: flex; justify-content: space-between; align-items: center;">
+                <a href="/interview-room/<%= interview._id %>" class="ip-btn ip-btn-secondary">
+                    Back to Interview Room
+                </a>
+                <a href="/interview-room/<%= interview._id %>/report" class="ip-btn ip-btn-primary">
+                    View Full Final Report
+                </a>
+            </div>
 
-    <h2>Overall Assessment</h2>
-
-    <p>
-        <%= summary.overallAssessment %>
-    </p>
-
-    <h2>Recommendation</h2>
-
-    <p>
-        <%= summary.recommendation %>
-    </p>
-
-    <hr>
-
-    <a href="/interview-room/<%= interview._id %>">
-        Back to Interview
-    </a>
+        </div>
+    </main>
 
 </body>
-
 </html>

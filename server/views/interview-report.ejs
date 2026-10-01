@@ -1,199 +1,262 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Final Interview Report</title>
+    <title>Final Interview Report - InterviewPilot</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/interview-report.css">
 </head>
-
 <body>
 
-    <h1>Final Interview Report</h1>
+    <!-- Global Navigation -->
+    <header class="ip-navbar">
+        <div class="ip-container ip-navbar-inner">
+            <a href="/dashboard" class="ip-brand">
+                <div class="ip-brand-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <span>Interview<span class="ip-brand-accent">Pilot</span></span>
+            </a>
 
-    <hr>
+            <nav>
+                <ul class="ip-nav-links">
+                    <li><a href="/dashboard" class="ip-nav-link">Dashboard</a></li>
+                    <li><a href="/jobs" class="ip-nav-link active">Hiring Roles</a></li>
+                    <li><a href="/available-jobs" class="ip-nav-link">Available Jobs</a></li>
+                    <li><a href="/my-applications" class="ip-nav-link">My Applications</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-    <h2>Candidate Information</h2>
+    <main class="ip-page-wrapper">
+        <div class="ip-container ip-report-container">
 
-    <p>
-        <strong>Name:</strong>
-        <%= interview.application.candidate.name %>
-    </p>
+            <!-- Report Header -->
+            <div class="ip-report-header">
+                <div>
+                    <span class="ip-badge ip-badge-completed" style="margin-bottom: 0.5rem;">Official Record</span>
+                    <h1>Final Interview Report</h1>
+                    <p class="ip-page-subtitle">Comprehensive candidate debrief, ratings, verbatim transcript, and AI synthesis</p>
+                </div>
 
-    <p>
-        <strong>Email:</strong>
-        <%= interview.application.candidate.email %>
-    </p>
+                <div style="display: flex; gap: 0.75rem;">
+                    <a href="/interview-room/<%= interview._id %>" class="ip-btn ip-btn-secondary">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Back to Interview
+                    </a>
+                    <button class="ip-btn ip-btn-primary" onclick="window.print()">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        Print / Export
+                    </button>
+                </div>
+            </div>
 
-    <h2>Position</h2>
+            <!-- 1. Candidate Information & Position & Interview Details -->
+            <div class="ip-report-section">
+                <div class="ip-report-section-header">
+                    <h2 class="ip-report-section-title">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        Candidate & Position Overview
+                    </h2>
+                    <span class="ip-badge ip-badge-<%= interview.status %>"><%= interview.status %></span>
+                </div>
+                <div class="ip-report-section-body">
+                    <div class="ip-meta-grid">
+                        <div class="ip-meta-block">
+                            <span class="ip-meta-label">Candidate Name</span>
+                            <span class="ip-meta-value"><%= interview.application && interview.application.candidate ? interview.application.candidate.name : 'N/A' %></span>
+                        </div>
+                        <div class="ip-meta-block">
+                            <span class="ip-meta-label">Candidate Email</span>
+                            <span class="ip-meta-value"><%= interview.application && interview.application.candidate ? interview.application.candidate.email : 'N/A' %></span>
+                        </div>
+                        <div class="ip-meta-block">
+                            <span class="ip-meta-label">Position</span>
+                            <span class="ip-meta-value"><%= interview.application && interview.application.job ? interview.application.job.title : 'N/A' %></span>
+                        </div>
+                        <div class="ip-meta-block">
+                            <span class="ip-meta-label">Interview ID</span>
+                            <span class="ip-meta-value" style="font-family: var(--font-mono); font-size: 0.8125rem;"><%= interview._id %></span>
+                        </div>
+                        <div class="ip-meta-block">
+                            <span class="ip-meta-label">Scheduled Date/Time</span>
+                            <span class="ip-meta-value"><%= interview.scheduledAt ? new Date(interview.scheduledAt).toLocaleString() : 'N/A' %></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <p>
-        <%= interview.application.job.title %>
-    </p>
+            <!-- 2. Interviewer Evaluation Scorecard -->
+            <div class="ip-report-section">
+                <div class="ip-report-section-header">
+                    <h2 class="ip-report-section-title">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                        </svg>
+                        Interviewer Evaluation
+                    </h2>
+                </div>
+                <div class="ip-report-section-body">
+                    <% if (evaluation) { %>
+                        <div class="ip-score-grid">
+                            <div class="ip-score-pill-card">
+                                <span class="ip-meta-label">Technical Skills</span>
+                                <div class="ip-score-pill-value"><%= evaluation.technicalSkills %>/5</div>
+                            </div>
+                            <div class="ip-score-pill-card">
+                                <span class="ip-meta-label">Communication</span>
+                                <div class="ip-score-pill-value"><%= evaluation.communication %>/5</div>
+                            </div>
+                            <div class="ip-score-pill-card">
+                                <span class="ip-meta-label">Problem Solving</span>
+                                <div class="ip-score-pill-value"><%= evaluation.problemSolving %>/5</div>
+                            </div>
+                            <div class="ip-score-pill-card" style="background: var(--color-primary-50); border-color: var(--color-primary-200);">
+                                <span class="ip-meta-label" style="color: var(--color-primary-700);">Overall Rating</span>
+                                <div class="ip-score-pill-value" style="color: var(--color-primary-700);"><%= evaluation.overallRating %>/5</div>
+                            </div>
+                        </div>
 
-    <hr>
+                        <% if (evaluation.comments) { %>
+                            <div style="background: var(--color-bg-app); border: 1px solid var(--color-border-default); border-radius: var(--radius-md); padding: 1rem 1.25rem;">
+                                <div class="ip-meta-label" style="margin-bottom: 0.375rem;">Evaluation Comments</div>
+                                <p style="color: var(--color-text-primary); line-height: 1.6;"><%= evaluation.comments %></p>
+                            </div>
+                        <% } %>
+                    <% } else { %>
+                        <p style="color: var(--color-text-muted);">Evaluation has not been submitted yet.</p>
+                    <% } %>
+                </div>
+            </div>
 
-    <h2>Interview Details</h2>
+            <!-- 3. Interviewer Notes -->
+            <div class="ip-report-section">
+                <div class="ip-report-section-header">
+                    <h2 class="ip-report-section-title">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Interviewer Observations & Notes
+                    </h2>
+                    <span class="ip-form-hint"><%= notes ? notes.length : 0 %> notes</span>
+                </div>
+                <div class="ip-report-section-body">
+                    <% if (notes && notes.length > 0) { %>
+                        <div class="ip-notes-feed">
+                            <% notes.forEach(note => { %>
+                                <div class="ip-note-entry">
+                                    <div class="ip-note-date"><%= note.createdAt ? new Date(note.createdAt).toLocaleString() : '' %></div>
+                                    <div style="color: var(--color-text-primary); line-height: 1.5;"><%= note.text %></div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    <% } else { %>
+                        <p style="color: var(--color-text-muted);">No interviewer notes were recorded during this session.</p>
+                    <% } %>
+                </div>
+            </div>
 
-    <p>
-        <strong>Interview ID:</strong>
-        <%= interview._id %>
-    </p>
+            <!-- 4. Interview Transcript -->
+            <div class="ip-report-section">
+                <div class="ip-report-section-header">
+                    <h2 class="ip-report-section-title">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        </svg>
+                        Verbatim Interview Transcript
+                    </h2>
+                    <span class="ip-form-hint"><%= transcripts ? transcripts.length : 0 %> entries</span>
+                </div>
+                <div class="ip-report-section-body">
+                    <% if (transcripts && transcripts.length > 0) { %>
+                        <div class="ip-transcript-list">
+                            <% transcripts.forEach(transcript => { %>
+                                <div class="ip-transcript-item <%= transcript.speaker === 'candidate' ? 'ip-transcript-candidate' : 'ip-transcript-interviewer' %>">
+                                    <div class="ip-transcript-meta">
+                                        <strong style="text-transform: capitalize;"><%= transcript.speaker %></strong>
+                                        <span><%= transcript.timestamp ? new Date(transcript.timestamp).toLocaleTimeString() : '' %></span>
+                                    </div>
+                                    <div style="color: var(--color-text-primary);"><%= transcript.text %></div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    <% } else { %>
+                        <p style="color: var(--color-text-muted);">No transcript was recorded for this session.</p>
+                    <% } %>
+                </div>
+            </div>
 
-    <p>
-        <strong>Scheduled At:</strong>
-        <%= interview.scheduledAt %>
-    </p>
+            <!-- 5. AI Synthesis Summary -->
+            <div class="ip-report-section">
+                <div class="ip-report-section-header" style="background: linear-gradient(135deg, #FAF5FF, #F3E8FF);">
+                    <h2 class="ip-report-section-title" style="color: #6B21A8;">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Gemini AI Assessment Summary
+                    </h2>
+                </div>
+                <div class="ip-report-section-body">
+                    <% if (summary) { %>
+                        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                            <div>
+                                <h3 style="font-size: 0.9375rem; color: #065F46; margin-bottom: 0.25rem;">Key Strengths</h3>
+                                <p style="line-height: 1.6;"><%= summary.strengths %></p>
+                            </div>
 
-    <p>
-        <strong>Status:</strong>
-        <%= interview.status %>
-    </p>
+                            <hr style="border: none; border-top: 1px solid var(--color-border-subtle);">
 
-    <hr>
+                            <div>
+                                <h3 style="font-size: 0.9375rem; color: #92400E; margin-bottom: 0.25rem;">Areas for Growth</h3>
+                                <p style="line-height: 1.6;"><%= summary.weaknesses %></p>
+                            </div>
 
-    <h2>Interviewer Evaluation</h2>
+                            <hr style="border: none; border-top: 1px solid var(--color-border-subtle);">
 
-    <% if (evaluation) { %>
+                            <div>
+                                <h3 style="font-size: 0.9375rem; color: #1E40AF; margin-bottom: 0.25rem;">Technical Competency</h3>
+                                <p style="line-height: 1.6;"><%= summary.technicalAssessment %></p>
+                            </div>
 
-        <p>
-            <strong>Technical Skills:</strong>
-            <%= evaluation.technicalSkills %>/5
-        </p>
+                            <hr style="border: none; border-top: 1px solid var(--color-border-subtle);">
 
-        <p>
-            <strong>Communication:</strong>
-            <%= evaluation.communication %>/5
-        </p>
+                            <div>
+                                <h3 style="font-size: 0.9375rem; color: #3730A3; margin-bottom: 0.25rem;">Overall Evaluation Synthesis</h3>
+                                <p style="line-height: 1.6;"><%= summary.overallAssessment %></p>
+                            </div>
 
-        <p>
-            <strong>Problem Solving:</strong>
-            <%= evaluation.problemSolving %>/5
-        </p>
+                            <div style="background: #FAF5FF; border: 1px solid #E9D5FF; border-radius: var(--radius-lg); padding: 1rem 1.25rem;">
+                                <h3 style="font-size: 0.875rem; text-transform: uppercase; color: #7E22CE; margin-bottom: 0.25rem;">Recommendation</h3>
+                                <div style="font-weight: 600; color: #581C87; line-height: 1.6;"><%= summary.recommendation %></div>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <p style="color: var(--color-text-muted);">AI Summary has not been generated for this interview session.</p>
+                    <% } %>
+                </div>
+            </div>
 
-        <p>
-            <strong>Overall Rating:</strong>
-            <%= evaluation.overallRating %>/5
-        </p>
+            <div style="margin-top: 2rem; display: flex; justify-content: space-between;">
+                <a href="/interview-room/<%= interview._id %>" class="ip-btn ip-btn-secondary">
+                    Back to Interview Room
+                </a>
+                <a href="/dashboard" class="ip-btn ip-btn-primary">
+                    Return to Dashboard
+                </a>
+            </div>
 
-        <p>
-            <strong>Comments:</strong>
-            <%= evaluation.comments %>
-        </p>
-
-    <% } else { %>
-
-        <p>Evaluation has not been completed.</p>
-
-    <% } %>
-
-    <hr>
-
-    <h2>Interviewer Notes</h2>
-
-    <% if (notes.length > 0) { %>
-
-        <% notes.forEach(note => { %>
-
-            <p>
-                <strong>
-                    <%= note.createdAt %>
-                </strong>
-            </p>
-
-            <p>
-                <%= note.text %>
-            </p>
-
-            <hr>
-
-        <% }); %>
-
-    <% } else { %>
-
-        <p>No interviewer notes were recorded.</p>
-
-    <% } %>
-
-    <h2>Interview Transcript</h2>
-
-    <% if (transcripts.length > 0) { %>
-
-        <% transcripts.forEach(transcript => { %>
-
-            <p>
-                <strong>
-                    <%= transcript.speaker %>
-                </strong>
-                -
-                <%= transcript.timestamp %>
-            </p>
-
-            <p>
-                <%= transcript.text %>
-            </p>
-
-            <hr>
-
-        <% }); %>
-
-    <% } else { %>
-
-        <p>No transcript was recorded.</p>
-
-    <% } %>
-
-    <hr>
-
-    <h2>AI Summary</h2>
-
-    <% if (summary) { %>
-
-        <h3>Strengths</h3>
-
-        <p>
-            <%= summary.strengths %>
-        </p>
-
-        <h3>Weaknesses</h3>
-
-        <p>
-            <%= summary.weaknesses %>
-        </p>
-
-        <h3>Technical Assessment</h3>
-
-        <p>
-            <%= summary.technicalAssessment %>
-        </p>
-
-        <h3>Overall Assessment</h3>
-
-        <p>
-            <%= summary.overallAssessment %>
-        </p>
-
-        <h3>Recommendation</h3>
-
-        <p>
-            <%= summary.recommendation %>
-        </p>
-
-    <% } else { %>
-
-        <p>
-            AI Summary has not been generated yet.
-        </p>
-
-    <% } %>
-
-    <hr>
-
-    <a href="/interview-room/<%= interview._id %>">
-        Back to Interview
-    </a>
+        </div>
+    </main>
 
 </body>
-
 </html>

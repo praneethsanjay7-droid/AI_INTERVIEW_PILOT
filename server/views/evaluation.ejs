@@ -1,104 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interview Evaluation</title>
+    <title>Interview Evaluation - InterviewPilot</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/evaluation.css">
 </head>
-
 <body>
 
-    <h1>Interview Evaluation</h1>
+    <!-- Global Navigation -->
+    <header class="ip-navbar">
+        <div class="ip-container ip-navbar-inner">
+            <a href="/dashboard" class="ip-brand">
+                <div class="ip-brand-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <span>Interview<span class="ip-brand-accent">Pilot</span></span>
+            </a>
 
-    <hr>
+            <nav>
+                <ul class="ip-nav-links">
+                    <li><a href="/dashboard" class="ip-nav-link">Dashboard</a></li>
+                    <li><a href="/jobs" class="ip-nav-link active">Hiring Roles</a></li>
+                    <li><a href="/available-jobs" class="ip-nav-link">Available Jobs</a></li>
+                    <li><a href="/my-applications" class="ip-nav-link">My Applications</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-    <h2>Candidate</h2>
+    <main class="ip-page-wrapper">
+        <div class="ip-container ip-eval-container">
 
-    <p>
-        <strong>Name:</strong>
-        <%= interview.application.candidate.name %>
-    </p>
+            <div class="ip-eval-card">
+                <div class="ip-page-header">
+                    <span class="ip-badge ip-badge-completed" style="margin-bottom: 0.5rem;">Post-Interview Scorecard</span>
+                    <h1>Candidate Evaluation</h1>
+                    <p class="ip-page-subtitle">Submit structured rating scores and qualitative feedback for the candidate assessment record.</p>
+                </div>
 
-    <p>
-        <strong>Email:</strong>
-        <%= interview.application.candidate.email %>
-    </p>
+                <!-- Candidate & Position Metadata -->
+                <div class="ip-eval-meta-box">
+                    <div>
+                        <div class="ip-form-hint" style="text-transform: uppercase; font-weight: 600;">Candidate</div>
+                        <div style="font-size: 1.0625rem; font-weight: 700; color: var(--color-text-primary); margin-top: 0.125rem;">
+                            <%= interview.application && interview.application.candidate ? interview.application.candidate.name : 'Candidate' %>
+                        </div>
+                        <div style="font-size: 0.8125rem; color: var(--color-text-muted);">
+                            <%= interview.application && interview.application.candidate ? interview.application.candidate.email : '' %>
+                        </div>
+                    </div>
 
-    <h2>Position</h2>
+                    <div>
+                        <div class="ip-form-hint" style="text-transform: uppercase; font-weight: 600;">Position</div>
+                        <div style="font-size: 1.0625rem; font-weight: 700; color: var(--color-text-primary); margin-top: 0.125rem;">
+                            <%= interview.application && interview.application.job ? interview.application.job.title : 'Position' %>
+                        </div>
+                    </div>
+                </div>
 
-    <p>
-        <%= interview.application.job.title %>
-    </p>
+                <form
+                    method="POST"
+                    action="/interview-room/<%= interview._id %>/evaluation"
+                >
+                    <div class="ip-score-criteria-grid">
 
-    <hr>
+                        <!-- Technical Skills -->
+                        <div class="ip-criteria-card">
+                            <div class="ip-criteria-header">
+                                <span>Technical Skills</span>
+                                <span class="ip-form-hint">Scale 1-5</span>
+                            </div>
+                            <select id="technicalSkills" class="ip-select" name="technicalSkills" required>
+                                <option value="">Select rating</option>
+                                <option value="1">1 - Poor</option>
+                                <option value="2">2 - Below Average</option>
+                                <option value="3">3 - Average</option>
+                                <option value="4">4 - Good</option>
+                                <option value="5">5 - Excellent</option>
+                            </select>
+                        </div>
 
-    <form
-        method="POST"
-        action="/interview-room/<%= interview._id %>/evaluation"
-    >
+                        <!-- Communication -->
+                        <div class="ip-criteria-card">
+                            <div class="ip-criteria-header">
+                                <span>Communication</span>
+                                <span class="ip-form-hint">Scale 1-5</span>
+                            </div>
+                            <select id="communication" class="ip-select" name="communication" required>
+                                <option value="">Select rating</option>
+                                <option value="1">1 - Poor</option>
+                                <option value="2">2 - Below Average</option>
+                                <option value="3">3 - Average</option>
+                                <option value="4">4 - Good</option>
+                                <option value="5">5 - Excellent</option>
+                            </select>
+                        </div>
 
-        <h3>Technical Skills</h3>
+                        <!-- Problem Solving -->
+                        <div class="ip-criteria-card">
+                            <div class="ip-criteria-header">
+                                <span>Problem Solving</span>
+                                <span class="ip-form-hint">Scale 1-5</span>
+                            </div>
+                            <select id="problemSolving" class="ip-select" name="problemSolving" required>
+                                <option value="">Select rating</option>
+                                <option value="1">1 - Poor</option>
+                                <option value="2">2 - Below Average</option>
+                                <option value="3">3 - Average</option>
+                                <option value="4">4 - Good</option>
+                                <option value="5">5 - Excellent</option>
+                            </select>
+                        </div>
 
-        <select name="technicalSkills" required>
-            <option value="">Select rating</option>
-            <option value="1">1 - Poor</option>
-            <option value="2">2 - Below Average</option>
-            <option value="3">3 - Average</option>
-            <option value="4">4 - Good</option>
-            <option value="5">5 - Excellent</option>
-        </select>
+                        <!-- Overall Rating -->
+                        <div class="ip-criteria-card">
+                            <div class="ip-criteria-header">
+                                <span>Overall Rating</span>
+                                <span class="ip-form-hint">Scale 1-5</span>
+                            </div>
+                            <select id="overallRating" class="ip-select" name="overallRating" required>
+                                <option value="">Select rating</option>
+                                <option value="1">1 - Poor</option>
+                                <option value="2">2 - Below Average</option>
+                                <option value="3">3 - Average</option>
+                                <option value="4">4 - Good</option>
+                                <option value="5">5 - Excellent</option>
+                            </select>
+                        </div>
 
-        <h3>Communication</h3>
+                    </div>
 
-        <select name="communication" required>
-            <option value="">Select rating</option>
-            <option value="1">1 - Poor</option>
-            <option value="2">2 - Below Average</option>
-            <option value="3">3 - Average</option>
-            <option value="4">4 - Good</option>
-            <option value="5">5 - Excellent</option>
-        </select>
+                    <!-- Qualitative Comments -->
+                    <div class="ip-form-group">
+                        <label class="ip-form-label" for="comments">Interviewer Comments & Rationale</label>
+                        <textarea
+                            id="comments"
+                            name="comments"
+                            class="ip-textarea"
+                            rows="6"
+                            placeholder="Provide detailed feedback on candidate answers, architecture reasoning, code quality, or domain knowledge..."
+                        ></textarea>
+                    </div>
 
-        <h3>Problem Solving</h3>
+                    <div class="ip-eval-actions">
+                        <a href="/interview-room/<%= interview._id %>" class="ip-btn ip-btn-secondary">
+                            Back to Room
+                        </a>
+                        <button type="submit" class="ip-btn ip-btn-primary">
+                            Save Evaluation
+                        </button>
+                    </div>
+                </form>
+            </div>
 
-        <select name="problemSolving" required>
-            <option value="">Select rating</option>
-            <option value="1">1 - Poor</option>
-            <option value="2">2 - Below Average</option>
-            <option value="3">3 - Average</option>
-            <option value="4">Good</option>
-            <option value="5">Excellent</option>
-        </select>
-
-        <h3>Overall Rating</h3>
-
-        <select name="overallRating" required>
-            <option value="">Select rating</option>
-            <option value="1">1 - Poor</option>
-            <option value="2">2 - Below Average</option>
-            <option value="3">3 - Average</option>
-            <option value="4">4 - Good</option>
-            <option value="5">5 - Excellent</option>
-        </select>
-
-        <h3>Comments</h3>
-
-        <textarea
-            name="comments"
-            rows="6"
-            cols="60"
-            placeholder="Write your overall interview comments..."
-        ></textarea>
-
-        <br><br>
-
-        <button type="submit">
-            Save Evaluation
-        </button>
-
-    </form>
+        </div>
+    </main>
 
 </body>
-
 </html>

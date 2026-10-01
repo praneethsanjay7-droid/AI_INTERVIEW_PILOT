@@ -1,40 +1,97 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Available Jobs</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Jobs - InterviewPilot</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/application-jobs.css">
 </head>
-
 <body>
 
-    <h1>Available Jobs</h1>
+    <!-- Global Navigation -->
+    <header class="ip-navbar">
+        <div class="ip-container ip-navbar-inner">
+            <a href="/dashboard" class="ip-brand">
+                <div class="ip-brand-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <span>Interview<span class="ip-brand-accent">Pilot</span></span>
+            </a>
 
-    <% if (jobs.length === 0) { %>
+            <nav>
+                <ul class="ip-nav-links">
+                    <li><a href="/dashboard" class="ip-nav-link">Dashboard</a></li>
+                    <li><a href="/jobs" class="ip-nav-link">Hiring Roles</a></li>
+                    <li><a href="/available-jobs" class="ip-nav-link active">Available Jobs</a></li>
+                    <li><a href="/my-applications" class="ip-nav-link">My Applications</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-        <p>No jobs are currently available.</p>
+    <main class="ip-page-wrapper">
+        <div class="ip-container">
 
-    <% } else { %>
-
-        <% jobs.forEach(job => { %>
-
-            <div>
-                <h2><%= job.title %></h2>
-
-                <p><%= job.description %></p>
-
-                <p>Status: <%= job.status %></p>
-
-                <a href="/apply/<%= job._id %>">
-                    Apply for this job
-                </a>
-
-                <hr>
+            <div class="ip-page-header">
+                <div class="ip-page-header-row">
+                    <div>
+                        <h1>Available Positions</h1>
+                        <p class="ip-page-subtitle">Discover open career opportunities and apply directly with your resume</p>
+                    </div>
+                    <div>
+                        <a href="/my-applications" class="ip-btn ip-btn-secondary">
+                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Track My Applications
+                        </a>
+                    </div>
+                </div>
             </div>
 
-        <% }) %>
+            <% if (!jobs || jobs.length === 0) { %>
+                <div class="ip-empty-state">
+                    <div class="ip-empty-icon">
+                        <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="ip-empty-title">No jobs available right now</h3>
+                    <p class="ip-empty-description">Check back soon for newly opened positions or check your existing applications.</p>
+                </div>
+            <% } else { %>
+                <div class="ip-jobs-board-grid">
+                    <% jobs.forEach(job => { %>
+                        <div class="ip-job-post-card">
+                            <div class="ip-job-post-header">
+                                <div>
+                                    <h2 class="ip-job-post-title"><%= job.title %></h2>
+                                </div>
+                                <span class="ip-badge ip-badge-<%= job.status %>"><%= job.status %></span>
+                            </div>
 
-    <% } %>
+                            <div class="ip-job-post-body">
+                                <p class="ip-job-post-desc"><%= job.description %></p>
+                            </div>
 
-    <a href="/dashboard">Back to Dashboard</a>
+                            <div class="ip-job-post-footer">
+                                <a href="/apply/<%= job._id %>" class="ip-btn ip-btn-primary">
+                                    Apply for this job
+                                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
+
+        </div>
+    </main>
 
 </body>
 </html>

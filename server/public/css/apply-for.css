@@ -1,0 +1,73 @@
+/* Apply For Job Page Stylesheet */
+
+.ip-apply-container {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.ip-apply-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  padding: 2.5rem 2rem;
+}
+
+.ip-job-summary-box {
+  background-color: var(--color-bg-subtle);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.ip-job-summary-box h3 {
+  font-size: 1.125rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-primary);
+}
+
+.ip-job-summary-box p {
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.ip-file-upload-box {
+  border: 2px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  background-color: var(--color-bg-app);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  position: relative;
+}
+
+.ip-file-upload-box:hover {
+  border-color: var(--color-primary-500);
+  background-color: var(--color-primary-50);
+}
+
+.ip-file-icon {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 0.75rem;
+  color: var(--color-primary-600);
+}
+
+.ip-file-input {
+  display: block;
+  width: 100%;
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.ip-apply-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border-subtle);
+}

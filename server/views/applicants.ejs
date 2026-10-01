@@ -1,45 +1,126 @@
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
 <head>
-    <title>Applicants</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Applicants for <%= job.title %> - InterviewPilot</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/applicants.css">
 </head>
 <body>
 
-```
-<h1>Applicants for <%= job.title %></h1>
-
-<% if (applications.length === 0) { %>
-
-    <p>No applicants yet.</p>
-
-<% } else { %>
-
-    <% applications.forEach(application => { %>
-
-        <div>
-            
-            <h2><%= application.candidate.name %></h2>
-
-            <p>Email: <%= application.candidate.email %></p>
-
-            <p>Status: <%= application.status %></p>
-
-            <a href="<%= application.resumeUrl %>" target="_blank">
-                View Resume
+    <!-- Global Navigation -->
+    <header class="ip-navbar">
+        <div class="ip-container ip-navbar-inner">
+            <a href="/dashboard" class="ip-brand">
+                <div class="ip-brand-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <span>Interview<span class="ip-brand-accent">Pilot</span></span>
             </a>
-            <a href="/schedule-interview/<%= application._id %>">
-    Schedule Interview
-</a>
-            <hr>
+
+            <nav>
+                <ul class="ip-nav-links">
+                    <li><a href="/dashboard" class="ip-nav-link">Dashboard</a></li>
+                    <li><a href="/jobs" class="ip-nav-link active">Hiring Roles</a></li>
+                    <li><a href="/available-jobs" class="ip-nav-link">Available Jobs</a></li>
+                    <li><a href="/my-applications" class="ip-nav-link">My Applications</a></li>
+                </ul>
+            </nav>
         </div>
+    </header>
 
-    <% }) %>
+    <main class="ip-page-wrapper">
+        <div class="ip-container">
 
-<% } %>
+            <!-- Job Summary Context Header -->
+            <div class="ip-job-header-card">
+                <div>
+                    <span class="ip-badge ip-badge-open" style="margin-bottom: 0.5rem;">Role Pipeline</span>
+                    <h1>Applicants for <%= job.title %></h1>
+                    <p class="ip-page-subtitle"><%= applications.length %> total candidate <%= applications.length === 1 ? 'application' : 'applications' %></p>
+                </div>
+                <div>
+                    <a href="/jobs" class="ip-btn ip-btn-secondary">
+                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Back to Hiring Roles
+                    </a>
+                </div>
+            </div>
 
-<a href="/jobs">Back to Hiring Roles</a>
-```
+            <% if (!applications || applications.length === 0) { %>
+                <div class="ip-empty-state">
+                    <div class="ip-empty-icon">
+                        <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="ip-empty-title">No applicants yet</h3>
+                    <p class="ip-empty-description">As candidates submit their resumes for this role, they will appear here for review and scheduling.</p>
+                </div>
+            <% } else { %>
+                <div class="ip-applicants-table-card">
+                    <div class="ip-table-responsive">
+                        <table class="ip-table">
+                            <thead>
+                                <tr>
+                                    <th>Candidate</th>
+                                    <th>Status</th>
+                                    <th>Resume</th>
+                                    <th style="text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% applications.forEach(application => { %>
+                                    <tr>
+                                        <td>
+                                            <div class="ip-candidate-cell">
+                                                <div class="ip-candidate-avatar">
+                                                    <%= application.candidate && application.candidate.name ? application.candidate.name.charAt(0).toUpperCase() : 'C' %>
+                                                </div>
+                                                <div class="ip-candidate-info">
+                                                    <span class="ip-candidate-name"><%= application.candidate ? application.candidate.name : 'Unknown Candidate' %></span>
+                                                    <span class="ip-candidate-email"><%= application.candidate ? application.candidate.email : '' %></span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="ip-badge ip-badge-<%= application.status %>"><%= application.status %></span>
+                                        </td>
+                                        <td>
+                                            <% if (application.resumeUrl) { %>
+                                                <a href="<%= application.resumeUrl %>" target="_blank" class="ip-btn ip-btn-secondary ip-btn-sm">
+                                                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                    </svg>
+                                                    View Resume
+                                                </a>
+                                            <% } else { %>
+                                                <span class="ip-form-hint">No file</span>
+                                            <% } %>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <a href="/schedule-interview/<%= application._id %>" class="ip-btn ip-btn-primary ip-btn-sm">
+                                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                                Schedule Interview
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            <% } %>
+
+        </div>
+    </main>
 
 </body>
 </html>

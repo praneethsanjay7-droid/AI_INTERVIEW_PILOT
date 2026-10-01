@@ -1,47 +1,83 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Create Hiring Role</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Hiring Role - InterviewPilot</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/create-job.css">
 </head>
-
 <body>
 
-    <h1>Create Hiring Role</h1>
+    <!-- Global Navigation -->
+    <header class="ip-navbar">
+        <div class="ip-container ip-navbar-inner">
+            <a href="/dashboard" class="ip-brand">
+                <div class="ip-brand-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <span>Interview<span class="ip-brand-accent">Pilot</span></span>
+            </a>
 
-    <form action="/create-job" method="POST">
-
-        <div>
-            <label>Job Title</label>
-            <input
-                type="text"
-                name="title"
-                placeholder="e.g. Frontend Developer"
-                required
-            >
+            <nav>
+                <ul class="ip-nav-links">
+                    <li><a href="/dashboard" class="ip-nav-link">Dashboard</a></li>
+                    <li><a href="/jobs" class="ip-nav-link active">Hiring Roles</a></li>
+                    <li><a href="/available-jobs" class="ip-nav-link">Available Jobs</a></li>
+                    <li><a href="/my-applications" class="ip-nav-link">My Applications</a></li>
+                </ul>
+            </nav>
         </div>
+    </header>
 
-        <br>
+    <main class="ip-page-wrapper">
+        <div class="ip-container">
 
-        <div>
-            <label>Job Description</label>
-            <textarea
-                name="description"
-                placeholder="Enter job description"
-                required
-            ></textarea>
+            <div class="ip-form-card">
+                <div class="ip-page-header">
+                    <h1>Create New Hiring Role</h1>
+                    <p class="ip-page-subtitle">Publish a job opening to collect candidate applications and conduct structured interviews.</p>
+                </div>
+
+                <form action="/create-job" method="POST">
+                    <div class="ip-form-group">
+                        <label class="ip-form-label" for="title">Job Title</label>
+                        <input
+                            id="title"
+                            class="ip-input"
+                            type="text"
+                            name="title"
+                            placeholder="e.g. Senior Frontend Engineer"
+                            required
+                        >
+                        <span class="ip-form-hint">Use a descriptive role title that candidates recognize.</span>
+                    </div>
+
+                    <div class="ip-form-group">
+                        <label class="ip-form-label" for="description">Job Description & Requirements</label>
+                        <textarea
+                            id="description"
+                            class="ip-textarea"
+                            name="description"
+                            rows="6"
+                            placeholder="Detail key responsibilities, qualifications, tech stack, and evaluation criteria..."
+                            required
+                        ></textarea>
+                    </div>
+
+                    <div class="ip-form-actions-row">
+                        <a href="/dashboard" class="ip-btn ip-btn-secondary">Cancel</a>
+                        <button class="ip-btn ip-btn-primary" type="submit">
+                            Create Hiring Role
+                        </button>
+                    </div>
+                </form>
+            </div>
+
         </div>
-
-        <br>
-
-        <button type="submit">
-            Create Hiring Role
-        </button>
-
-    </form>
-
-    <br>
-
-    <a href="/dashboard">Back to Dashboard</a>
+    </main>
 
 </body>
 </html>

@@ -1,66 +1,94 @@
-
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
 <head>
-    <title>Schedule Interview</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Interview - InterviewPilot</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/schedule-interview.css">
 </head>
 <body>
 
-```
-<h1>Schedule Interview</h1>
+    <!-- Global Navigation -->
+    <header class="ip-navbar">
+        <div class="ip-container ip-navbar-inner">
+            <a href="/dashboard" class="ip-brand">
+                <div class="ip-brand-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <span>Interview<span class="ip-brand-accent">Pilot</span></span>
+            </a>
 
-<h2>Candidate</h2>
+            <nav>
+                <ul class="ip-nav-links">
+                    <li><a href="/dashboard" class="ip-nav-link">Dashboard</a></li>
+                    <li><a href="/jobs" class="ip-nav-link active">Hiring Roles</a></li>
+                    <li><a href="/available-jobs" class="ip-nav-link">Available Jobs</a></li>
+                    <li><a href="/my-applications" class="ip-nav-link">My Applications</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-<p>
-    Name:
-    <%= application.candidate.name %>
-</p>
+    <main class="ip-page-wrapper">
+        <div class="ip-container">
 
-<p>
-    Email:
-    <%= application.candidate.email %>
-</p>
+            <div class="ip-schedule-card">
+                <div class="ip-page-header">
+                    <h1>Schedule Candidate Interview</h1>
+                    <p class="ip-page-subtitle">Set the date and time for the video interview session.</p>
+                </div>
 
-<h2>Job</h2>
+                <!-- Context Information Summary -->
+                <div class="ip-schedule-summary">
+                    <div class="ip-summary-item">
+                        <span class="ip-summary-label">Candidate</span>
+                        <span class="ip-summary-value"><%= application.candidate ? application.candidate.name : 'Candidate' %></span>
+                        <span class="ip-form-hint"><%= application.candidate ? application.candidate.email : '' %></span>
+                    </div>
 
-<p>
-    Position:
-    <%= application.job.title %>
-</p>
+                    <div class="ip-summary-item">
+                        <span class="ip-summary-label">Position</span>
+                        <span class="ip-summary-value"><%= application.job ? application.job.title : 'Position' %></span>
+                    </div>
+                </div>
 
-<form
-    action="/schedule-interview/<%= application._id %>"
-    method="POST"
->
+                <form
+                    action="/schedule-interview/<%= application._id %>"
+                    method="POST"
+                >
+                    <div class="ip-form-group">
+                        <label class="ip-form-label" for="scheduledAt">
+                            Interview Date and Time
+                        </label>
+                        <input
+                            type="datetime-local"
+                            id="scheduledAt"
+                            name="scheduledAt"
+                            class="ip-input"
+                            required
+                        >
+                        <span class="ip-form-hint">Both interviewer and candidate will be able to join the room at this scheduled time.</span>
+                    </div>
 
-    <label for="scheduledAt">
-        Interview Date and Time
-    </label>
+                    <div class="ip-schedule-form-actions">
+                        <a href="/jobs/<%= application.job ? application.job._id : '' %>/applicants" class="ip-btn ip-btn-secondary">
+                            Cancel
+                        </a>
+                        <button type="submit" class="ip-btn ip-btn-primary">
+                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            Schedule Interview
+                        </button>
+                    </div>
+                </form>
+            </div>
 
-    <br>
-
-    <input
-        type="datetime-local"
-        id="scheduledAt"
-        name="scheduledAt"
-        required
-    >
-
-    <br><br>
-
-    <button type="submit">
-        Schedule Interview
-    </button>
-
-</form>
-
-<br>
-
-<a href="/jobs/<%= application.job._id %>/applicants">
-    Back to Applicants
-</a>
-```
+        </div>
+    </main>
 
 </body>
 </html>

@@ -1,0 +1,367 @@
+/* Interview Room (Interviewer Command Center) Stylesheet */
+
+.ip-room-page {
+  background-color: #0F172A;
+  color: #F8FAFC;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Dark Mode Top Bar */
+.ip-room-navbar {
+  background-color: #1E293B;
+  border-bottom: 1px solid #334155;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.ip-room-meta-group {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.ip-room-candidate-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.ip-room-candidate-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.ip-room-candidate-sub {
+  font-size: 0.8125rem;
+  color: #94A3B8;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ip-room-role-pill {
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid #F59E0B;
+  color: #FCD34D;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Workspace Layout */
+.ip-room-workspace {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .ip-room-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ip-room-stage-area {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Scheduled State Control Banner */
+.ip-room-state-banner {
+  background: #1E293B;
+  border: 1px solid #334155;
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+}
+
+.ip-countdown-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 2.25rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: #60A5FA;
+  margin: 0.5rem 0;
+}
+
+.ip-countdown-box span {
+  background: #0F172A;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-md);
+  border: 1px solid #334155;
+}
+
+.ip-consent-box {
+  background: #0F172A;
+  border: 1px solid #334155;
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  color: #CBD5E1;
+}
+
+.ip-consent-box input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary-600);
+  cursor: pointer;
+}
+
+/* Video Feeds Grid */
+.ip-video-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  min-height: 380px;
+}
+
+@media (max-width: 768px) {
+  .ip-video-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ip-video-card {
+  background: #1E293B;
+  border: 1px solid #334155;
+  border-radius: var(--radius-xl);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-md);
+}
+
+.ip-video-card-header {
+  position: absolute;
+  top: 0.875rem;
+  left: 0.875rem;
+  right: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+}
+
+.ip-video-tag {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.ip-video-element {
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  object-fit: cover;
+  background-color: #0B0F19;
+  border-radius: var(--radius-xl);
+}
+
+.ip-media-controls-bar {
+  background: #1E293B;
+  border: 1px solid #334155;
+  border-radius: var(--radius-lg);
+  padding: 0.875rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+#mediaStatus {
+  font-size: 0.8125rem;
+  color: #94A3B8;
+  font-weight: 500;
+}
+
+/* Live Transcript Panel */
+.ip-transcript-panel {
+  background: #1E293B;
+  border: 1px solid #334155;
+  border-radius: var(--radius-xl);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.ip-transcript-feed {
+  height: 180px;
+  overflow-y: auto;
+  background: #0F172A;
+  border: 1px solid #334155;
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.ip-transcript-feed p {
+  font-size: 0.875rem;
+  color: #E2E8F0;
+  line-height: 1.5;
+}
+
+.ip-transcript-feed strong {
+  color: #818CF8;
+}
+
+.ip-transcript-input-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ip-transcript-input-group input {
+  flex: 1;
+  background: #0F172A;
+  border: 1px solid #334155;
+  color: #FFFFFF;
+  padding: 0.5rem 0.875rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+}
+
+/* Right Sidebar: AI Questions & Notes */
+.ip-room-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.ip-sidebar-card {
+  background: #1E293B;
+  border: 1px solid #334155;
+  border-radius: var(--radius-xl);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ip-sidebar-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #F8FAFC;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ip-ai-badge {
+  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  color: #FFFFFF;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-full);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ip-ai-questions-feed {
+  background: #0F172A;
+  border: 1px solid #334155;
+  border-radius: var(--radius-lg);
+  padding: 0.875rem 1rem;
+  min-height: 120px;
+  max-height: 220px;
+  overflow-y: auto;
+  font-size: 0.875rem;
+  color: #CBD5E1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.ip-ai-questions-feed p {
+  color: #E0E7FF;
+  border-left: 2px solid #818CF8;
+  padding-left: 0.5rem;
+}
+
+.ip-notes-history {
+  background: #0F172A;
+  border: 1px solid #334155;
+  border-radius: var(--radius-lg);
+  padding: 0.75rem 1rem;
+  max-height: 140px;
+  overflow-y: auto;
+  font-size: 0.8125rem;
+  color: #CBD5E1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ip-notes-history p {
+  color: #CBD5E1;
+  border-bottom: 1px dashed #334155;
+  padding-bottom: 0.375rem;
+}
+
+.ip-notes-history p:last-child {
+  border-bottom: none;
+}
+
+.ip-note-textarea {
+  background: #0F172A;
+  border: 1px solid #334155;
+  color: #FFFFFF;
+  border-radius: var(--radius-md);
+  padding: 0.625rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  width: 100%;
+  resize: vertical;
+  min-height: 70px;
+}
+
+.ip-note-textarea:focus {
+  outline: none;
+  border-color: #6366F1;
+}
+
+/* Post-Interview Action List */
+.ip-completed-actions-box {
+  background: #1E293B;
+  border: 1px solid #334155;
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ip-completed-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}

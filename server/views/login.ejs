@@ -1,27 +1,63 @@
-<form action="/login" method="POST">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - InterviewPilot</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/login.css">
+</head>
+<body class="ip-auth-page">
 
-    <input
-        type="email"
-        name="email"
-        placeholder="Email"
-        required
-    >
+    <div class="ip-auth-container">
+        <div class="ip-auth-card">
+            <div class="ip-auth-header">
+                <div class="ip-auth-logo">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <h1 class="ip-auth-title">Welcome back</h1>
+                <p class="ip-auth-subtitle">Sign in to your InterviewPilot workspace</p>
+            </div>
 
-    <br><br>
+            <form class="ip-auth-form" action="/login" method="POST">
+                <div class="ip-form-group">
+                    <label class="ip-form-label" for="email">Email Address</label>
+                    <input
+                        id="email"
+                        class="ip-input"
+                        type="email"
+                        name="email"
+                        placeholder="you@company.com"
+                        autocomplete="email"
+                        required
+                    >
+                </div>
 
-    <input
-        type="password"
-        name="password"
-        placeholder="Password"
-        required
-    >
+                <div class="ip-form-group">
+                    <label class="ip-form-label" for="password">Password</label>
+                    <input
+                        id="password"
+                        class="ip-input"
+                        type="password"
+                        name="password"
+                        placeholder="••••••••"
+                        autocomplete="current-password"
+                        required
+                    >
+                </div>
 
-    <br><br>
+                <button class="ip-btn ip-btn-primary ip-btn-lg ip-btn-block" type="submit">
+                    Sign In
+                </button>
+            </form>
 
-    <button type="submit">Login</button>
+            <div class="ip-auth-footer">
+                Don't have an account? <a href="/register">Create an account</a>
+            </div>
+        </div>
+    </div>
 
-</form>
-
-<br>
-
-<a href="/register">Create an account</a>
+</body>
+</html>

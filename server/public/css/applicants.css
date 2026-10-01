@@ -1,0 +1,103 @@
+/* Applicants Page Stylesheet */
+
+.ip-job-header-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-xs);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.ip-applicants-table-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+
+.ip-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.ip-table th {
+  background-color: var(--color-bg-subtle);
+  padding: 0.875rem 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.ip-table td {
+  padding: 1rem 1.25rem;
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-border-subtle);
+  vertical-align: middle;
+}
+
+.ip-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ip-table tbody tr:hover td {
+  background-color: var(--color-bg-subtle);
+}
+
+.ip-candidate-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ip-candidate-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-primary-100);
+  color: var(--color-primary-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.ip-candidate-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.ip-candidate-name {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.ip-candidate-email {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.ip-actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .ip-table-responsive {
+    overflow-x: auto;
+  }
+}

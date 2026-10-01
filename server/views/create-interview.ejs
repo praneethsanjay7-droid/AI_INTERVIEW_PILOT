@@ -1,51 +1,95 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Create Interview</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Direct Interview - InterviewPilot</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/create-interview.css">
 </head>
 <body>
 
-    <h1>Create Interview</h1>
+    <!-- Global Navigation -->
+    <header class="ip-navbar">
+        <div class="ip-container ip-navbar-inner">
+            <a href="/dashboard" class="ip-brand">
+                <div class="ip-brand-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <span>Interview<span class="ip-brand-accent">Pilot</span></span>
+            </a>
 
-    <form action="/create-interview" method="POST">
+            <nav>
+                <ul class="ip-nav-links">
+                    <li><a href="/dashboard" class="ip-nav-link">Dashboard</a></li>
+                    <li><a href="/jobs" class="ip-nav-link">Hiring Roles</a></li>
+                    <li><a href="/available-jobs" class="ip-nav-link">Available Jobs</a></li>
+                    <li><a href="/my-applications" class="ip-nav-link">My Applications</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-        <label>Candidate Name</label>
-        <input
-            type="text"
-            name="candidateName"
-            required
-        >
+    <main class="ip-page-wrapper">
+        <div class="ip-container">
 
-        <br><br>
+            <div class="ip-direct-interview-card">
+                <div class="ip-page-header">
+                    <span class="ip-badge ip-badge-scheduled" style="margin-bottom: 0.5rem;">Direct Interview Setup</span>
+                    <h1>Create Direct Interview</h1>
+                    <p class="ip-page-subtitle">Instantly create a standalone interview session for a candidate.</p>
+                </div>
 
-        <label>Candidate Email</label>
-        <input
-            type="email"
-            name="candidateEmail"
-            required
-        >
+                <form action="/create-interview" method="POST">
+                    <div class="ip-form-group">
+                        <label class="ip-form-label" for="candidateName">Candidate Name</label>
+                        <input
+                            id="candidateName"
+                            class="ip-input"
+                            type="text"
+                            name="candidateName"
+                            placeholder="e.g. Jordan Smith"
+                            required
+                        >
+                    </div>
 
-        <br><br>
+                    <div class="ip-form-group">
+                        <label class="ip-form-label" for="candidateEmail">Candidate Email</label>
+                        <input
+                            id="candidateEmail"
+                            class="ip-input"
+                            type="email"
+                            name="candidateEmail"
+                            placeholder="jordan.smith@example.com"
+                            required
+                        >
+                    </div>
 
-        <label>Position</label>
-        <input
-            type="text"
-            name="position"
-            placeholder="e.g. Software Developer"
-            required
-        >
+                    <div class="ip-form-group">
+                        <label class="ip-form-label" for="position">Position / Role Title</label>
+                        <input
+                            id="position"
+                            class="ip-input"
+                            type="text"
+                            name="position"
+                            placeholder="e.g. Software Developer"
+                            required
+                        >
+                    </div>
 
-        <br><br>
+                    <div class="ip-direct-actions">
+                        <a href="/dashboard" class="ip-btn ip-btn-secondary">Back to Dashboard</a>
+                        <button class="ip-btn ip-btn-primary" type="submit">
+                            Create Interview
+                        </button>
+                    </div>
+                </form>
+            </div>
 
-        <button type="submit">
-            Create Interview
-        </button>
-
-    </form>
-
-    <br>
-
-    <a href="/dashboard">Back to Dashboard</a>
+        </div>
+    </main>
 
 </body>
 </html>

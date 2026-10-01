@@ -62,7 +62,7 @@ const applyForJob=async(req,res)=>{
             resumeUrl:result.secure_url
         });
         await application.save()
-        res.send("Application submitted successfully");
+        res.redirect("/dashboard");
     }catch(err){
         console.log(err);
         res.send("Application failed");

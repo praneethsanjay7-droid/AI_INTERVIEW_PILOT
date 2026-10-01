@@ -1,808 +1,512 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interview Room</title>
-    <style>
-        .window-role {
-            display: inline-block;
-            margin: 16px 0 8px;
-            padding: 8px 12px;
-            border-left: 4px solid #a34f00;
-            background: #fff2df;
-            color: #713800;
-            font-weight: 700;
-        }
-    </style>
+    <title>Interview Room - InterviewPilot</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/interview-room.css">
 </head>
-
-<body>
-
-    <div class="window-role" role="status" aria-label="Current interview window: interviewer">
-        Interviewer Window
-    </div>
-
-    <h1>Interview Room</h1>
-
-    <hr>
-
-    <h2>Candidate</h2>
-
-    <p>
-        <strong>Name:</strong>
-        <%= interview.application.candidate.name %>
-    </p>
-
-    <p>
-        <strong>Email:</strong>
-        <%= interview.application.candidate.email %>
-    </p>
-
-    <hr>
-
-    <h2>Job</h2>
-
-    <p>
-        <strong>Position:</strong>
-        <%= interview.application.job.title %>
-    </p>
-
-    <p>
-        <strong>Description:</strong>
-        <%= interview.application.job.description %>
-    </p>
-
-    <hr>
-
-    <h2>Interview Details</h2>
-
-    <p>
-        <strong>Scheduled At:</strong>
-        <%= interview.scheduledAt %>
-    </p>
-
-    <p>
-        <strong>Status:</strong>
-        <%= interview.status %>
-    </p>
-
-    <hr>
-
-    <h2>Interview Schedule</h2>
-<h2>Interview Status</h2>
-
-<% if (interview.status === "scheduled") { %>
-
-    <h3 id="countdownTitle">Interview starts in</h3>
-
-    <p id="countdown">
-        <span id="hours">00</span> :
-        <span id="minutes">00</span> :
-        <span id="seconds">00</span>
-    </p>
-
-    <p id="statusMessage">
-        Please wait until the scheduled interview time.
-    </p>
-
-    <hr>
-
-    <h2>Candidate Consent</h2>
-
-    <p>
-        Before starting the interview, the candidate must give
-        consent for the interview to be recorded and transcribed.
-    </p>
-
-    <label>
-        <input type="checkbox" id="consentCheckbox">
-        I confirm that the candidate has given consent
-        for the interview to be recorded and transcribed.
-    </label>
-
-    <br><br>
-
-    <form
-        action="/interview-room/<%= interview._id %>/start"
-        method="POST"
-    >
-        <button
-            id="startInterviewBtn"
-            type="submit"
-            disabled
-        >
-            Start Interview
-        </button>
-    </form>
-
-    <p id="waitingMessage">
-        Please wait until the scheduled interview time.
-    </p>
-
-<% } else if (interview.status === "ongoing") { %>
-
-    <h3>Interview is currently ongoing</h3>
-
-    <p>
-        The interview has started successfully.
-    </p>
-<form
-    action="/interview-room/<%= interview._id %>/end"
-    method="POST"
->
-    <button type="submit">
-        End Interview
-    </button>
-</form>
-
-<% } else if (interview.status === "completed") { %>
-
-    <h3>Interview completed</h3>
-
-    <a href="/interview-room/<%= interview._id %>/evaluation">
-        Evaluate Interview
-    </a>
-
-    <br><br>
-
-    <a href="/interview-room/<%= interview._id %>/summary">
-        View AI Summary
-    </a>
-
-    <br><br>
-
-    <form
-        action="/interview-room/<%= interview._id %>/generate-summary"
-        method="POST"
-    >
-        <button type="submit">
-            Generate AI Summary
-        </button>
-    </form>
-<br><br>
-
-<a href="/interview-room/<%= interview._id %>/report">
-    View Final Interview Report
-</a>
-
-<% } else if (interview.status === "cancelled") { %>
-
-    <h3>Interview cancelled</h3>
-
-<% } %>
-<hr>
-
-<h2>Live Transcript</h2>
-
-<div id="transcript">
-
-    <% transcripts.forEach(item => { %>
-
-        <p>
-            <strong><%= item.speaker %>:</strong>
-            <%= item.text %>
-        </p>
-
-    <% }) %>
-
-</div>
-<br>
-
-<hr>
-
-<h2>AI Follow-up Questions</h2>
-
-<div id="follow-up-questions">
-    <p>No follow-up questions yet.</p>
-</div>
-<hr>
-
-<h2>Interviewer Notes</h2>
-
-<form method="POST" action="/interview-room/<%= interview._id %>/note">
-
-    <textarea
-        name="text"
-        rows="5"
-        cols="60"
-        placeholder="Write your notes about the candidate..."
-        required
-    ></textarea>
-
-    <br><br>
-
-    <button type="submit">Save Note</button>
-
-</form>
-
-<h3>Previous Notes</h3>
-
-<div id="notes">
-
-    <% if (notes && notes.length > 0) { %>
-
-        <% notes.forEach(note => { %>
-
-            <p>
-                <%= note.text %>
-            </p>
-
-        <% }) %>
-
-    <% } else { %>
-
-        <p>No notes yet.</p>
-
-    <% } %>
-
-</div>
-
-<input
-    type="text"
-    id="transcriptInput"
-    placeholder="Enter transcript text"
->
-
-<button id="sendTranscriptBtn">
-    Send Transcript
-</button>
-
-<hr>
-
-<h2>Interview Media</h2>
-
-<video
-    id="localVideo"
-    autoplay
-    muted
-    playsinline
-    width="400"
-></video>
-
-<br><br>
-
-<button id="enableMediaBtn">
-    Enable Camera & Microphone
-</button>
-
-<p id="mediaStatus"></p>
-
-<h3>Interviewer</h3>
-
-<video
-    id="localVideo"
-    autoplay
-    muted
-    playsinline
-    width="400">
-</video>
-
-<h3>Candidate</h3>
-
-<video
-    id="remoteVideo"
-    autoplay
-    playsinline
-    width="400">
-</video>
-
-
-
-<% if (interview.status === "scheduled") { %>
-    <script>
-
-        /*
-         * Get the scheduled interview time
-         * from the Interview document.
-         */
-        const scheduledTime = new Date(
-            "<%= interview.scheduledAt.toISOString() %>"
-        ).getTime();
-
-
-        /*
-         * Get HTML elements.
-         */
-        const countdownTitle =
-            document.getElementById("countdownTitle");
-
-        const hoursElement =
-            document.getElementById("hours");
-
-        const minutesElement =
-            document.getElementById("minutes");
-
-        const secondsElement =
-            document.getElementById("seconds");
-
-        const statusMessage =
-            document.getElementById("statusMessage");
-
-        const consentCheckbox =
-            document.getElementById("consentCheckbox");
-
-        const startInterviewBtn =
-            document.getElementById("startInterviewBtn");
-
-        const waitingMessage =
-            document.getElementById("waitingMessage");
-
-
-        /*
-         * Indicates whether the scheduled
-         * interview time has arrived.
-         */
-        let interviewTimeReached = false;
-
-
-        /*
-         * Enable/disable Start Interview button.
-         */
-        function updateStartButton() {
-
-    if (!startInterviewBtn || !consentCheckbox) {
-        return;
-    }
-
-            startInterviewBtn.disabled = !(
-                interviewTimeReached && consentCheckbox.checked
-            );
-
-            if (!interviewTimeReached) {
-                waitingMessage.textContent =
-                    "Please wait until the scheduled interview time.";
-            } else if (!consentCheckbox.checked) {
-                waitingMessage.textContent =
-                    "Please confirm candidate consent to continue.";
-            } else {
-                waitingMessage.textContent =
-                    "The interview is ready to start.";
-            }
-        }
-
-
-        /*
-         * Update countdown.
-         */
-        function updateCountdown() {
-
-            const currentTime = Date.now();
-
-            const difference =
-                scheduledTime - currentTime;
-
-
-            /*
-             * Interview time has arrived.
-             */
-            if (difference <= 0) {
-
-                interviewTimeReached = true;
-
-                countdownTitle.textContent =
-                    "Interview is ready to start";
-
-                hoursElement.textContent = "00";
-                minutesElement.textContent = "00";
-                secondsElement.textContent = "00";
-
-                statusMessage.textContent =
-                    "The scheduled interview time has arrived.";
-
-                updateStartButton();
-
-                return;
-            }
-
-
-            /*
-             * Convert remaining milliseconds
-             * into hours, minutes and seconds.
-             */
-            const totalSeconds =
-                Math.floor(difference / 1000);
-
-            const hours =
-                Math.floor(totalSeconds / 3600);
-
-            const minutes =
-                Math.floor(
-                    (totalSeconds % 3600) / 60
+<body class="ip-room-page">
+
+    <!-- Top Command Center Bar -->
+    <header class="ip-room-navbar">
+        <div class="ip-room-meta-group">
+            <a href="/dashboard" class="ip-brand" style="color: #FFFFFF;">
+                <div class="ip-brand-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <span>Interview<span class="ip-brand-accent">Pilot</span></span>
+            </a>
+
+            <div class="ip-room-role-pill">Interviewer Session</div>
+
+            <div class="ip-room-candidate-info">
+                <span class="ip-room-candidate-title">
+                    <%= interview.application && interview.application.candidate ? interview.application.candidate.name : (interview.candidateName || 'Candidate') %>
+                </span>
+                <span class="ip-room-candidate-sub">
+                    <span><%= interview.application && interview.application.job ? interview.application.job.title : (interview.position || 'Role') %></span>
+                    <span>•</span>
+                    <span><%= interview.application && interview.application.candidate ? interview.application.candidate.email : (interview.candidateEmail || '') %></span>
+                </span>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <span class="ip-badge ip-badge-<%= interview.status %>"><%= interview.status %></span>
+
+            <% if (interview.status === "ongoing") { %>
+                <form action="/interview-room/<%= interview._id %>/end" method="POST" style="display: inline;">
+                    <button type="submit" class="ip-btn ip-btn-danger ip-btn-sm">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        End Interview
+                    </button>
+                </form>
+            <% } %>
+
+            <a href="/dashboard" class="ip-btn ip-btn-secondary ip-btn-sm" style="background: #334155; color: #FFFFFF; border-color: #475569;">
+                Exit Room
+            </a>
+        </div>
+    </header>
+
+    <!-- Workspace -->
+    <main class="ip-room-workspace">
+
+        <!-- Left / Center: Video Stage & Live Transcript -->
+        <div class="ip-room-stage-area">
+
+            <!-- SCHEDULED STATE BANNER -->
+            <% if (interview.status === "scheduled") { %>
+                <div class="ip-room-state-banner">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <h2 id="countdownTitle" style="color: #FFFFFF; font-size: 1.25rem;">Interview starts in</h2>
+                            <div id="countdown" class="ip-countdown-box">
+                                <span id="hours">00</span> :
+                                <span id="minutes">00</span> :
+                                <span id="seconds">00</span>
+                            </div>
+                            <p id="statusMessage" style="color: #94A3B8; font-size: 0.875rem;">
+                                Please wait until the scheduled interview time.
+                            </p>
+                        </div>
+
+                        <div style="max-width: 420px;">
+                            <div class="ip-consent-box">
+                                <label style="display: flex; align-items: flex-start; gap: 0.625rem; cursor: pointer;">
+                                    <input type="checkbox" id="consentCheckbox">
+                                    <span>I confirm that the candidate has given consent for the interview to be recorded and transcribed.</span>
+                                </label>
+                            </div>
+
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <form action="/interview-room/<%= interview._id %>/start" method="POST">
+                                    <button id="startInterviewBtn" type="submit" class="ip-btn ip-btn-primary" disabled>
+                                        Start Interview
+                                    </button>
+                                </form>
+                                <span id="waitingMessage" style="font-size: 0.8125rem; color: #94A3B8;">
+                                    Please wait until the scheduled interview time.
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% } else if (interview.status === "completed") { %>
+                <!-- COMPLETED STATE ACTIONS -->
+                <div class="ip-completed-actions-box">
+                    <div>
+                        <h2 style="color: #10B981; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Interview Completed
+                        </h2>
+                        <p style="color: #94A3B8; font-size: 0.875rem;">
+                            This interview has concluded. You can submit candidate evaluation scores, generate Gemini AI summaries, and view the final report.
+                        </p>
+                    </div>
+
+                    <div class="ip-completed-actions-grid">
+                        <a href="/interview-room/<%= interview._id %>/evaluation" class="ip-btn ip-btn-primary">
+                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Evaluate Candidate
+                        </a>
+
+                        <form action="/interview-room/<%= interview._id %>/generate-summary" method="POST">
+                            <button type="submit" class="ip-btn ip-btn-secondary ip-btn-block" style="background: #334155; color: #FFFFFF; border-color: #475569;">
+                                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                                Generate AI Summary
+                            </button>
+                        </form>
+
+                        <a href="/interview-room/<%= interview._id %>/summary" class="ip-btn ip-btn-secondary" style="background: #334155; color: #FFFFFF; border-color: #475569;">
+                            View AI Summary
+                        </a>
+
+                        <a href="/interview-room/<%= interview._id %>/report" class="ip-btn ip-btn-secondary" style="background: #334155; color: #FFFFFF; border-color: #475569;">
+                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            View Final Report
+                        </a>
+                    </div>
+                </div>
+            <% } %>
+
+            <!-- Video Grid -->
+            <div class="ip-video-grid">
+                <!-- Local Video (Interviewer) -->
+                <div class="ip-video-card">
+                    <div class="ip-video-card-header">
+                        <span class="ip-video-tag">You (Interviewer)</span>
+                    </div>
+                    <video id="localVideo" class="ip-video-element" autoplay muted playsinline></video>
+                </div>
+
+                <!-- Remote Video (Candidate) -->
+                <div class="ip-video-card">
+                    <div class="ip-video-card-header">
+                        <span class="ip-video-tag">
+                            <%= interview.application && interview.application.candidate ? interview.application.candidate.name : 'Candidate' %> (Remote)
+                        </span>
+                    </div>
+                    <video id="remoteVideo" class="ip-video-element" autoplay playsinline></video>
+                </div>
+            </div>
+
+            <!-- Media Controls Bar -->
+            <div class="ip-media-controls-bar">
+                <button id="enableMediaBtn" class="ip-btn ip-btn-primary ip-btn-sm">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Enable Camera & Microphone
+                </button>
+                <span id="mediaStatus"></span>
+            </div>
+
+            <!-- Live Transcript Stream -->
+            <div class="ip-transcript-panel">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <h3 class="ip-sidebar-title">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        </svg>
+                        Live Transcript Stream
+                    </h3>
+                </div>
+
+                <div id="transcript" class="ip-transcript-feed">
+                    <% if (transcripts && transcripts.length > 0) { %>
+                        <% transcripts.forEach(item => { %>
+                            <p>
+                                <strong><%= item.speaker %>:</strong>
+                                <%= item.text %>
+                            </p>
+                        <% }) %>
+                    <% } else { %>
+                        <p style="color: #64748B;">No transcript entries recorded yet.</p>
+                    <% } %>
+                </div>
+
+                <div class="ip-transcript-input-group">
+                    <input
+                        type="text"
+                        id="transcriptInput"
+                        placeholder="Broadcast message or transcript text..."
+                    >
+                    <button id="sendTranscriptBtn" class="ip-btn ip-btn-secondary ip-btn-sm" style="background: #334155; color: #FFFFFF; border-color: #475569;">
+                        Send
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Sidebar: AI Questions, Candidate Details & Notes -->
+        <aside class="ip-room-sidebar">
+
+            <!-- AI Follow-up Questions Card -->
+            <div class="ip-sidebar-card">
+                <div class="ip-sidebar-title">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span>AI Follow-up Questions</span>
+                    <span class="ip-ai-badge">Gemini AI</span>
+                </div>
+
+                <div id="follow-up-questions" class="ip-ai-questions-feed">
+                    <p style="color: #94A3B8;">AI suggestions will generate as the candidate speaks during the interview.</p>
+                </div>
+            </div>
+
+            <!-- Interviewer Notes Card -->
+            <div class="ip-sidebar-card">
+                <div class="ip-sidebar-title">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    <span>Interviewer Notes</span>
+                </div>
+
+                <form method="POST" action="/interview-room/<%= interview._id %>/note">
+                    <textarea
+                        name="text"
+                        class="ip-note-textarea"
+                        placeholder="Type observation, skill assessment, or note..."
+                        required
+                    ></textarea>
+                    <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+                        <button type="submit" class="ip-btn ip-btn-primary ip-btn-sm">Save Note</button>
+                    </div>
+                </form>
+
+                <div style="margin-top: 0.25rem;">
+                    <div style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #94A3B8; margin-bottom: 0.375rem;">
+                        Previous Notes
+                    </div>
+                    <div id="notes" class="ip-notes-history">
+                        <% if (notes && notes.length > 0) { %>
+                            <% notes.forEach(note => { %>
+                                <p><%= note.text %></p>
+                            <% }) %>
+                        <% } else { %>
+                            <p style="color: #64748B;">No notes saved yet.</p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+        </aside>
+
+    </main>
+
+    <!-- Preserved JavaScript Logic -->
+    <% if (interview.status === "scheduled") { %>
+        <script>
+            const scheduledTime = new Date(
+                "<%= interview.scheduledAt.toISOString() %>"
+            ).getTime();
+
+            const countdownTitle = document.getElementById("countdownTitle");
+            const hoursElement = document.getElementById("hours");
+            const minutesElement = document.getElementById("minutes");
+            const secondsElement = document.getElementById("seconds");
+            const statusMessage = document.getElementById("statusMessage");
+            const consentCheckbox = document.getElementById("consentCheckbox");
+            const startInterviewBtn = document.getElementById("startInterviewBtn");
+            const waitingMessage = document.getElementById("waitingMessage");
+
+            let interviewTimeReached = false;
+
+            function updateStartButton() {
+                if (!startInterviewBtn || !consentCheckbox) {
+                    return;
+                }
+
+                startInterviewBtn.disabled = !(
+                    interviewTimeReached && consentCheckbox.checked
                 );
 
-            const seconds =
-                totalSeconds % 60;
+                if (!interviewTimeReached) {
+                    waitingMessage.textContent = "Please wait until the scheduled interview time.";
+                } else if (!consentCheckbox.checked) {
+                    waitingMessage.textContent = "Please confirm candidate consent to continue.";
+                } else {
+                    waitingMessage.textContent = "The interview is ready to start.";
+                }
+            }
 
+            function updateCountdown() {
+                const currentTime = Date.now();
+                const difference = scheduledTime - currentTime;
 
-            /*
-             * Display countdown.
-             */
-            hoursElement.textContent =
-                String(hours).padStart(2, "0");
+                if (difference <= 0) {
+                    interviewTimeReached = true;
+                    if (countdownTitle) countdownTitle.textContent = "Interview is ready to start";
+                    if (hoursElement) hoursElement.textContent = "00";
+                    if (minutesElement) minutesElement.textContent = "00";
+                    if (secondsElement) secondsElement.textContent = "00";
+                    if (statusMessage) statusMessage.textContent = "The scheduled interview time has arrived.";
+                    updateStartButton();
+                    return;
+                }
 
-            minutesElement.textContent =
-                String(minutes).padStart(2, "0");
+                const totalSeconds = Math.floor(difference / 1000);
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
 
-            secondsElement.textContent =
-                String(seconds).padStart(2, "0");
+                if (hoursElement) hoursElement.textContent = String(hours).padStart(2, "0");
+                if (minutesElement) minutesElement.textContent = String(minutes).padStart(2, "0");
+                if (secondsElement) secondsElement.textContent = String(seconds).padStart(2, "0");
 
-            updateStartButton();
-        }
+                updateStartButton();
+            }
 
+            if (consentCheckbox) {
+                consentCheckbox.addEventListener("change", updateStartButton);
+            }
 
-        /*
-         * When consent changes,
-         * check whether Start Interview
-         * can be enabled.
-         */
-        consentCheckbox.addEventListener(
-            "change",
-            updateStartButton
-        );
+            updateCountdown();
 
-
-        /*
-         * Run once immediately.
-         */
-        updateCountdown();
-
-
-        /*
-         * Update countdown every second.
-         */
-        if (!interviewTimeReached) {
-            const countdownTimer = setInterval(
-                () => {
+            if (!interviewTimeReached) {
+                const countdownTimer = setInterval(() => {
                     updateCountdown();
-
                     if (interviewTimeReached) {
                         clearInterval(countdownTimer);
                     }
-                },
-                1000
-            );
-        }
-
-    </script>
-<% } %>
+                }, 1000);
+            }
+        </script>
+    <% } %>
 
     <script src="/socket.io/socket.io.js"></script>
-<script>
-    const socket = io();
+    <script>
+        const socket = io();
+        const interviewId = "<%= interview._id %>";
 
-    const interviewId = "<%= interview._id %>";
-
-    socket.on("connect", () => {
-        console.log("Connected to Socket.IO:", socket.id);
-
-        socket.emit("join-interview", {
-            interviewId,
-            role: "interviewer"
-        });
-    });
-
-    socket.on("interview-participant-connected", (participant) => {
-        if (participant.role === "candidate") {
-            console.log(
-                "Candidate connected to Socket.IO:",
-                participant.socketId
-            );
-        }
-    });
-
-    socket.on("candidate-media-enabled", () => {
-        console.log("Candidate camera and microphone enabled");
-    });
-
-    socket.on("disconnect", () => {
-        console.log("Disconnected from Socket.IO");
-    });
-
-
-    // -------------------------
-    // TRANSCRIPT
-    // -------------------------
-
-    const transcriptInput =
-        document.getElementById("transcriptInput");
-
-    const sendTranscriptBtn =
-        document.getElementById("sendTranscriptBtn");
-
-    const transcript =
-        document.getElementById("transcript");
-
-    sendTranscriptBtn.addEventListener("click", () => {
-
-        const text = transcriptInput.value.trim();
-
-        if (!text) {
-            return;
-        }
-
-        socket.emit("transcript", {
-            interviewId: interviewId,
-            text: text
+        socket.on("connect", () => {
+            console.log("Connected to Socket.IO:", socket.id);
+            socket.emit("join-interview", {
+                interviewId,
+                role: "interviewer"
+            });
         });
 
-        transcriptInput.value = "";
-    });
-socket.on("transcript", (data) => {
-
-    console.log("INTERVIEWER RECEIVED TRANSCRIPT:", data);
-
-    const paragraph = document.createElement("p");
-
-    paragraph.textContent =
-        `${data.speaker}: ${data.text}`;
-
-    transcript.appendChild(paragraph);
-
-});
-
-socket.on("follow-up-questions", (data) => {
-
-    console.log(
-        "INTERVIEWER RECEIVED FOLLOW-UP QUESTIONS:",
-        data.questions
-    );
-
-    const container = document.getElementById("follow-up-questions");
-
-    container.innerHTML = "";
-
-    const questions = data.questions.split("\n");
-
-    questions.forEach(question => {
-
-        const paragraph = document.createElement("p");
-
-        paragraph.textContent = question;
-
-        container.appendChild(paragraph);
-    });
-
-});
-
-
-    // -------------------------
-    // CAMERA / MICROPHONE
-    // -------------------------
-
-    const localVideo =
-        document.getElementById("localVideo");
-
-    const enableMediaBtn =
-        document.getElementById("enableMediaBtn");
-
-    const mediaStatus =
-        document.getElementById("mediaStatus");
-
-    let localStream = null;
-
-    let peerConnection = null;
-    const remoteVideo=document.getElementById("remoteVideo");
-    console.log("Remote video element:", remoteVideo);
-
-
-    peerConnection=new RTCPeerConnection();
-
-peerConnection.addEventListener("track", (event) => {
-
-    console.log("Remote track received");
-    console.log("Track kind:", event.track.kind);
-    console.log("Track enabled:", event.track.enabled);
-    console.log("Track readyState:", event.track.readyState);
-
-    if (event.streams && event.streams[0]) {
-
-        remoteVideo.srcObject = event.streams[0];
-
-        console.log(
-            "Remote stream assigned:",
-            remoteVideo.srcObject
-        );
-
-        console.log(
-            "Remote video tracks:",
-            event.streams[0].getVideoTracks()
-        );
-
-        console.log(
-            "Remote audio tracks:",
-            event.streams[0].getAudioTracks()
-        );
-    }
-});
-    // -------------------------
-    // INTERVIEWER STARTS WEBRTC
-    // -------------------------
-
-    enableMediaBtn.addEventListener("click", async () => {
-
-        try {
-
-            localStream =
-                await navigator.mediaDevices.getUserMedia({
-                    video: true,
-                    audio: true
-                });
-
-            localVideo.srcObject = localStream;
-
-
-            // Create PeerConnection
-            peerConnection = new RTCPeerConnection();
-
-
-            // -------------------------
-            // ICE CANDIDATE LISTENER
-    peerConnection.addEventListener("track", (event) => {
-
-    console.log("Remote track received");
-
-    console.log("Track kind:", event.track.kind);
-    console.log("Track enabled:", event.track.enabled);
-    console.log("Track readyState:", event.track.readyState);
-
-    if (event.streams && event.streams[0]) {
-
-        remoteVideo.srcObject = event.streams[0];
-
-        console.log(
-            "Remote stream assigned:",
-            remoteVideo.srcObject
-        );
-
-        console.log(
-            "Remote video tracks:",
-            event.streams[0].getVideoTracks()
-        );
-
-        console.log(
-            "Remote audio tracks:",
-            event.streams[0].getAudioTracks()
-        );
-    }
-});
-
-            peerConnection.addEventListener(
-                "icecandidate",
-                (event) => {
-
-                    if (event.candidate) {
-
-                        socket.emit("webrtc-ice-candidate", {
-                            interviewId: interviewId,
-                            candidate: event.candidate
-                        });
-
-                        console.log(
-                            "Interviewer ICE candidate sent"
-                        );
-                    }
-
-                }
-            );
-
-
-            // Add camera and microphone tracks
-            localStream.getTracks().forEach((track) => {
-
-                peerConnection.addTrack(
-                    track,
-                    localStream
-                );
-
-            });
-
-
-            // Create offer
-            const offer =
-                await peerConnection.createOffer();
-
-
-            await peerConnection.setLocalDescription(
-                offer
-            );
-
-
-            // Send offer to candidate
-            socket.emit("webrtc-offer", {
-
-                interviewId: interviewId,
-
-                offer:
-                    peerConnection.localDescription
-
-            });
-
-
-            console.log("WebRTC offer sent");
-
-
-            mediaStatus.textContent =
-                "Camera and microphone enabled.";
-
-            enableMediaBtn.disabled = true;
-
-
-        } catch (error) {
-
-            console.error(error);
-
-            mediaStatus.textContent =
-                "Camera or microphone permission was denied.";
-
-        }
-
-    });
-
-
-    // -------------------------
-    // RECEIVE WEBRTC ANSWER
-    // -------------------------
-
-    socket.on("webrtc-answer", async (data) => {
-
-        try {
-
-            await peerConnection.setRemoteDescription(
-                data.answer
-            );
-
-            console.log(
-                "WebRTC answer received"
-            );
-
-        } catch (error) {
-
-            console.error(
-                "Failed to apply WebRTC answer:",
-                error
-            );
-
-        }
-
-    });
-
-
-    // -------------------------
-    // RECEIVE ICE CANDIDATE
-    // -------------------------
-
-    socket.on(
-        "webrtc-ice-candidate",
-        async (data) => {
-
-            try {
-
-                await peerConnection.addIceCandidate(
-                    data.candidate
-                );
-
-                console.log(
-                    "Interviewer ICE candidate received"
-                );
-
-            } catch (error) {
-
-                console.error(
-                    "Failed to add interviewer ICE candidate:",
-                    error
-                );
-
+        socket.on("interview-participant-connected", (participant) => {
+            if (participant.role === "candidate") {
+                console.log("Candidate connected to Socket.IO:", participant.socketId);
             }
+        });
 
+        socket.on("candidate-media-enabled", () => {
+            console.log("Candidate camera and microphone enabled");
+        });
+
+        socket.on("disconnect", () => {
+            console.log("Disconnected from Socket.IO");
+        });
+
+        // -------------------------
+        // TRANSCRIPT
+        // -------------------------
+        const transcriptInput = document.getElementById("transcriptInput");
+        const sendTranscriptBtn = document.getElementById("sendTranscriptBtn");
+        const transcript = document.getElementById("transcript");
+
+        if (sendTranscriptBtn && transcriptInput) {
+            sendTranscriptBtn.addEventListener("click", () => {
+                const text = transcriptInput.value.trim();
+                if (!text) return;
+
+                socket.emit("transcript", {
+                    interviewId: interviewId,
+                    text: text
+                });
+                transcriptInput.value = "";
+            });
         }
-    );
 
+        socket.on("transcript", (data) => {
+            console.log("INTERVIEWER RECEIVED TRANSCRIPT:", data);
+            if (transcript) {
+                const paragraph = document.createElement("p");
+                paragraph.innerHTML = `<strong>${data.speaker}:</strong> ${data.text}`;
+                transcript.appendChild(paragraph);
+                transcript.scrollTop = transcript.scrollHeight;
+            }
+        });
 
-</script>
+        socket.on("follow-up-questions", (data) => {
+            console.log("INTERVIEWER RECEIVED FOLLOW-UP QUESTIONS:", data.questions);
+            const container = document.getElementById("follow-up-questions");
+            if (container) {
+                container.innerHTML = "";
+                const questions = data.questions.split("\n");
+                questions.forEach(question => {
+                    if (question.trim()) {
+                        const paragraph = document.createElement("p");
+                        paragraph.textContent = question;
+                        container.appendChild(paragraph);
+                    }
+                });
+            }
+        });
+
+        // -------------------------
+        // CAMERA / MICROPHONE (WEBRTC)
+        // -------------------------
+        const localVideo = document.getElementById("localVideo");
+        const enableMediaBtn = document.getElementById("enableMediaBtn");
+        const mediaStatus = document.getElementById("mediaStatus");
+        const remoteVideo = document.getElementById("remoteVideo");
+
+        let localStream = null;
+        let peerConnection = null;
+
+        if (enableMediaBtn) {
+            enableMediaBtn.addEventListener("click", async () => {
+                try {
+                    localStream = await navigator.mediaDevices.getUserMedia({
+                        video: true,
+                        audio: true
+                    });
+
+                    if (localVideo) localVideo.srcObject = localStream;
+
+                    peerConnection = new RTCPeerConnection();
+
+                    peerConnection.addEventListener("track", (event) => {
+                        console.log("Remote track received");
+                        if (event.streams && event.streams[0] && remoteVideo) {
+                            remoteVideo.srcObject = event.streams[0];
+                        }
+                    });
+
+                    peerConnection.addEventListener("icecandidate", (event) => {
+                        if (event.candidate) {
+                            socket.emit("webrtc-ice-candidate", {
+                                interviewId: interviewId,
+                                candidate: event.candidate
+                            });
+                        }
+                    });
+
+                    localStream.getTracks().forEach((track) => {
+                        peerConnection.addTrack(track, localStream);
+                    });
+
+                    const offer = await peerConnection.createOffer();
+                    await peerConnection.setLocalDescription(offer);
+
+                    socket.emit("webrtc-offer", {
+                        interviewId: interviewId,
+                        offer: peerConnection.localDescription
+                    });
+
+                    if (mediaStatus) mediaStatus.textContent = "Camera and microphone enabled.";
+                    enableMediaBtn.disabled = true;
+
+                } catch (error) {
+                    console.error(error);
+                    if (mediaStatus) mediaStatus.textContent = "Camera or microphone permission was denied.";
+                }
+            });
+        }
+
+        socket.on("webrtc-answer", async (data) => {
+            try {
+                if (peerConnection) {
+                    await peerConnection.setRemoteDescription(data.answer);
+                }
+            } catch (error) {
+                console.error("Failed to apply WebRTC answer:", error);
+            }
+        });
+
+        socket.on("webrtc-ice-candidate", async (data) => {
+            try {
+                if (peerConnection) {
+                    await peerConnection.addIceCandidate(data.candidate);
+                }
+            } catch (error) {
+                console.error("Failed to add interviewer ICE candidate:", error);
+            }
+        });
+    </script>
 
 </body>
-
 </html>
-```

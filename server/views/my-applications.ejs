@@ -1,87 +1,162 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Applications</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Applications - InterviewPilot</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/my-applications.css">
 </head>
-
 <body>
 
-    <h1>My Applications</h1>
+    <!-- Global Navigation -->
+    <header class="ip-navbar">
+        <div class="ip-container ip-navbar-inner">
+            <a href="/dashboard" class="ip-brand">
+                <div class="ip-brand-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <span>Interview<span class="ip-brand-accent">Pilot</span></span>
+            </a>
 
-    <% if (applications.length === 0) { %>
+            <nav>
+                <ul class="ip-nav-links">
+                    <li><a href="/dashboard" class="ip-nav-link">Dashboard</a></li>
+                    <li><a href="/available-jobs" class="ip-nav-link">Available Jobs</a></li>
+                    <li><a href="/my-applications" class="ip-nav-link active">My Applications</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-        <p>You have not applied for any jobs yet.</p>
+    <main class="ip-page-wrapper">
+        <div class="ip-container">
 
-    <% } else { %>
+            <div class="ip-page-header">
+                <div class="ip-page-header-row">
+                    <div>
+                        <h1>My Applications</h1>
+                        <p class="ip-page-subtitle">Track your submitted job applications, interview schedules, and statuses</p>
+                    </div>
+                    <div>
+                        <a href="/available-jobs" class="ip-btn ip-btn-primary">
+                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            Browse More Jobs
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-        <% applications.forEach(application => { %>
+            <% if (!applications || applications.length === 0) { %>
+                <div class="ip-empty-state">
+                    <div class="ip-empty-icon">
+                        <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="ip-empty-title">You have not applied for any jobs yet</h3>
+                    <p class="ip-empty-description">Explore available opportunities and submit your resume to start your interview journey.</p>
+                    <a href="/available-jobs" class="ip-btn ip-btn-primary">Explore Available Jobs</a>
+                </div>
+            <% } else { %>
+                <div class="ip-applications-list">
+                    <% applications.forEach(application => { %>
+                        <%
+                            const interview = interviews ? interviews.find(item =>
+                                item.application &&
+                                item.application._id.toString() ===
+                                application._id.toString()
+                            ) : null;
+                        %>
 
-            <hr>
+                        <div class="ip-app-card">
+                            <div class="ip-app-header">
+                                <h2 class="ip-app-title">
+                                    <%= application.job ? application.job.title : 'Position' %>
+                                </h2>
+                                <span class="ip-badge ip-badge-<%= application.status %>">
+                                    <%= application.status %>
+                                </span>
+                            </div>
 
-            <h2>
-                <%= application.job.title %>
-            </h2>
+                            <div class="ip-app-body">
+                                <p class="ip-app-desc">
+                                    <%= application.job ? application.job.description : '' %>
+                                </p>
 
-            <p>
-                <strong>Description:</strong>
-                <%= application.job.description %>
-            </p>
+                                <!-- Visual Progression Stepper -->
+                                <div class="ip-pipeline-steps">
+                                    <div class="ip-pipeline-step ip-step-completed">
+                                        <div class="ip-step-dot">✓</div>
+                                        <span class="ip-step-label">Applied</span>
+                                    </div>
+                                    <div class="ip-pipeline-step <%= application.status === 'shortlisted' || interview ? 'ip-step-completed' : 'ip-step-active' %>">
+                                        <div class="ip-step-dot"><%= application.status === 'shortlisted' || interview ? '✓' : '2' %></div>
+                                        <span class="ip-step-label">Shortlisted</span>
+                                    </div>
+                                    <div class="ip-pipeline-step <%= interview ? 'ip-step-active' : '' %>">
+                                        <div class="ip-step-dot">3</div>
+                                        <span class="ip-step-label">Interview</span>
+                                    </div>
+                                    <div class="ip-pipeline-step <%= (interview && interview.status === 'completed') ? 'ip-step-completed' : '' %>">
+                                        <div class="ip-step-dot">4</div>
+                                        <span class="ip-step-label">Completed</span>
+                                    </div>
+                                </div>
 
-            <p>
-                <strong>Application Status:</strong>
-                <%= application.status %>
-                <%
-    const interview = interviews.find(item =>
-        item.application &&
-        item.application._id.toString() ===
-        application._id.toString()
-    );
-%>
+                                <!-- Scheduled Interview Action Box -->
+                                <% if (interview) { %>
+                                    <div class="ip-interview-action-box">
+                                        <div class="ip-interview-details">
+                                            <div style="font-weight: 700; color: var(--color-primary-800); font-size: 1rem;">
+                                                Scheduled Video Interview
+                                            </div>
+                                            <div class="ip-interview-meta">
+                                                <span><strong>Date:</strong> <%= interview.scheduledAt ? new Date(interview.scheduledAt).toLocaleDateString() : 'TBD' %></span>
+                                                <span>•</span>
+                                                <span><strong>Time:</strong> <%= interview.scheduledAt ? new Date(interview.scheduledAt).toLocaleTimeString() : 'TBD' %></span>
+                                                <span>•</span>
+                                                <span class="ip-badge ip-badge-<%= interview.status %>"><%= interview.status %></span>
+                                            </div>
+                                        </div>
 
-<% if (interview) { %>
+                                        <div>
+                                            <% if (interview.status === "scheduled") { %>
+                                                <a href="/candidate-interview/<%= interview._id %>" class="ip-btn ip-btn-primary">
+                                                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                    </svg>
+                                                    Join Interview
+                                                </a>
+                                            <% } else if (interview.status === "ongoing") { %>
+                                                <a href="/candidate-interview/<%= interview._id %>" class="ip-btn ip-btn-success">
+                                                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                                    </svg>
+                                                    Join Ongoing Interview
+                                                </a>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                <% } %>
 
-    <h3>Interview Scheduled</h3>
+                            </div>
 
-    <p>
-        <strong>Date:</strong>
-        <%= interview.scheduledAt.toLocaleDateString() %>
-    </p>
+                            <div class="ip-app-footer">
+                                <strong>Applied On:</strong> <%= application.createdAt ? new Date(application.createdAt).toLocaleString() : '' %>
+                            </div>
+                        </div>
 
-    <p>
-        <strong>Time:</strong>
-        <%= interview.scheduledAt.toLocaleTimeString() %>
-    </p>
+                    <% }) %>
+                </div>
+            <% } %>
 
-    <p>
-        <strong>Interview Status:</strong>
-        <%= interview.status %>
-    </p>
-
-    <% if (interview.status === "scheduled") { %>
-
-        <a href="/candidate-interview/<%= interview._id %>">
-            Join Interview
-        </a>
-
-    <% } else if (interview.status === "ongoing") { %>
-
-        <a href="/candidate-interview/<%= interview._id %>">
-            Join Ongoing Interview
-        </a>
-
-    <% } %>
-
-<% } %>
-            </p>
-
-            <p>
-                <strong>Applied On:</strong>
-                <%= application.createdAt.toLocaleString() %>
-            </p>
-
-        <% }) %>
-
-    <% } %>
+        </div>
+    </main>
 
 </body>
 </html>

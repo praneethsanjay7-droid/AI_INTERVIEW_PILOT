@@ -1,0 +1,2151 @@
+
+============================================================
+FILE: applicants.ejs
+============================================================
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Applicants</title>
+</head>
+<body>
+
+```
+<h1>Applicants for <%= job.title %></h1>
+
+<% if (applications.length === 0) { %>
+
+    <p>No applicants yet.</p>
+
+<% } else { %>
+
+    <% applications.forEach(application => { %>
+
+        <div>
+            
+            <h2><%= application.candidate.name %></h2>
+
+            <p>Email: <%= application.candidate.email %></p>
+
+            <p>Status: <%= application.status %></p>
+
+            <a href="<%= application.resumeUrl %>" target="_blank">
+                View Resume
+            </a>
+            <a href="/schedule-interview/<%= application._id %>">
+    Schedule Interview
+</a>
+            <hr>
+        </div>
+
+    <% }) %>
+
+<% } %>
+
+<a href="/jobs">Back to Hiring Roles</a>
+```
+
+</body>
+</html>
+
+============================================================
+FILE: application-jobs.ejs
+============================================================
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Available Jobs</title>
+</head>
+
+<body>
+
+    <h1>Available Jobs</h1>
+
+    <% if (jobs.length === 0) { %>
+
+        <p>No jobs are currently available.</p>
+
+    <% } else { %>
+
+        <% jobs.forEach(job => { %>
+
+            <div>
+                <h2><%= job.title %></h2>
+
+                <p><%= job.description %></p>
+
+                <p>Status: <%= job.status %></p>
+
+                <a href="/apply/<%= job._id %>">
+                    Apply for this job
+                </a>
+
+                <hr>
+            </div>
+
+        <% }) %>
+
+    <% } %>
+
+    <a href="/dashboard">Back to Dashboard</a>
+
+</body>
+</html>
+
+============================================================
+FILE: apply-for.ejs
+============================================================
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Apply for Job</title>
+</head>
+
+<body>
+
+    <h1>Apply for <%= job.title %></h1>
+
+    <p>
+        <%= job.description %>
+    </p>
+
+    <form
+        action="/apply/<%= job._id %>"
+        method="POST"
+        enctype="multipart/form-data"
+    >
+
+        <label>Upload Resume (PDF)</label>
+
+        <input
+            type="file"
+            name="resume"
+            accept=".pdf"
+            required
+        >
+
+        <br><br>
+
+        <button type="submit">
+            Submit Application
+        </button>
+
+    </form>
+
+    <br>
+
+    <a href="/available-jobs">Back to Jobs</a>
+
+</body>
+</html>
+
+============================================================
+FILE: candidate-interview.ejs
+============================================================
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Candidate Interview</title>
+    <style>
+        .window-role {
+            display: inline-block;
+            margin: 16px 0 8px;
+            padding: 8px 12px;
+            border-left: 4px solid #087f8c;
+            background: #e7f6f5;
+            color: #07545b;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="window-role" role="status" aria-label="Current interview window: candidate">
+        Candidate Window
+    </div>
+
+    <h1>Candidate Interview Room</h1>
+
+    <h2>Interview Details</h2>
+
+    <p>
+        <strong>Job:</strong>
+        <%= interview.application.job.title %>
+    </p>
+
+    <p>
+        <strong>Candidate:</strong>
+        <%= interview.application.candidate.name %>
+    </p>
+
+    <p>
+        <strong>Interview Status:</strong>
+        <%= interview.status %>
+    </p>
+
+    <hr>
+
+    <h2>Camera & Microphone</h2>
+
+    <video
+        id="localVideo"
+        autoplay
+        muted
+        playsinline
+        width="400">
+    </video>
+
+    <br><br>
+
+    <button id="enableMediaBtn">
+        Enable Camera & Microphone
+    </button>
+
+    <p id="mediaStatus"></p>
+
+    <hr>
+
+<h2>Speech to Text</h2>
+
+<button id="startSpeechBtn">
+    Start Speaking
+</button>
+
+<button id="stopSpeechBtn" disabled>
+    Stop Speaking
+</button>
+
+<p id="speechStatus"></p>
+
+<p>
+    <strong>Recognized Text:</strong>
+</p>
+
+<div id="speechText"></div>
+
+<h3>Candidate</h3>
+
+<video
+    id="localVideo"
+    autoplay
+    muted
+    playsinline
+    width="400">
+</video>
+
+<h3>Interviewer</h3>
+
+<video
+    id="remoteVideo"
+    autoplay
+    playsinline
+    width="400">
+</video>
+
+<hr>
+
+<h2>Speech to Text Test</h2>
+
+<button id="startRecordingBtn">
+    Start Recording
+</button>
+
+<button id="stopRecordingBtn" disabled>
+    Stop Recording
+</button>
+
+<p id="recordingStatus"></p>
+
+<p>
+    <strong>Transcript:</strong>
+</p>
+
+<div id="transcriptResult"></div>
+
+
+    <script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+    const interviewId = "<%= interview._id %>";
+
+    socket.on("connect", () => {
+        socket.emit("join-interview", {
+            interviewId,
+            role: "candidate"
+        });
+    });
+
+    const enableMediaBtn = document.getElementById("enableMediaBtn");
+    const localVideo = document.getElementById("localVideo");
+    const remoteVideo = document.getElementById("remoteVideo");
+    const mediaStatus = document.getElementById("mediaStatus");
+
+    let candidateStream = null;
+    let peerConnection = null;
+    let pendingOffer = null;
+    const pendingIceCandidates = [];
+
+    const createPeerConnection = () => {
+        if (peerConnection) {
+            return;
+        }
+
+        peerConnection = new RTCPeerConnection();
+
+        peerConnection.addEventListener("track", (event) => {
+            if (event.streams[0]) {
+                remoteVideo.srcObject = event.streams[0];
+            }
+        });
+
+        peerConnection.addEventListener("icecandidate", (event) => {
+            if (event.candidate) {
+                socket.emit("webrtc-ice-candidate", {
+                    interviewId,
+                    candidate: event.candidate
+                });
+            }
+        });
+    };
+
+    const answerPendingOffer = async () => {
+        if (!candidateStream || !pendingOffer) {
+            return;
+        }
+
+        createPeerConnection();
+
+        try {
+            await peerConnection.setRemoteDescription(pendingOffer);
+            pendingOffer = null;
+
+            candidateStream.getTracks().forEach((track) => {
+                peerConnection.addTrack(track, candidateStream);
+            });
+
+            while (pendingIceCandidates.length > 0) {
+                await peerConnection.addIceCandidate(
+                    pendingIceCandidates.shift()
+                );
+            }
+
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+
+            socket.emit("webrtc-answer", {
+                interviewId,
+                answer: peerConnection.localDescription
+            });
+        } catch (error) {
+            console.error("Failed to answer interviewer offer:", error);
+            mediaStatus.textContent = "Could not connect interview media.";
+        }
+    };
+
+    enableMediaBtn.addEventListener("click", async () => {
+        try {
+            candidateStream = await navigator.mediaDevices.getUserMedia({
+                video: true,
+                audio: true
+            });
+
+            localVideo.srcObject = candidateStream;
+            createPeerConnection();
+            enableMediaBtn.disabled = true;
+            mediaStatus.textContent = "Camera and microphone enabled.";
+            socket.emit("candidate-media-enabled", interviewId);
+
+            await answerPendingOffer();
+        } catch (error) {
+            console.error("Candidate camera or microphone error:", error);
+            mediaStatus.textContent =
+                "Could not access camera or microphone.";
+        }
+    });
+
+    socket.on("webrtc-offer", async (data) => {
+        pendingOffer = data.offer;
+        await answerPendingOffer();
+    });
+
+    socket.on("webrtc-ice-candidate", async (data) => {
+        if (!peerConnection || !peerConnection.remoteDescription) {
+            pendingIceCandidates.push(data.candidate);
+            return;
+        }
+
+        try {
+            await peerConnection.addIceCandidate(data.candidate);
+        } catch (error) {
+            console.error("Failed to add interviewer ICE candidate:", error);
+        }
+    });
+
+    const startRecordingBtn = document.getElementById("startRecordingBtn");
+    const stopRecordingBtn = document.getElementById("stopRecordingBtn");
+    const recordingStatus = document.getElementById("recordingStatus");
+    const transcriptResult = document.getElementById("transcriptResult");
+
+    let mediaRecorder;
+    let recordingStream = null;
+    let audioChunks = [];
+
+    startRecordingBtn.addEventListener("click", async () => {
+        try {
+            recordingStream = await navigator.mediaDevices.getUserMedia({
+                audio: true
+            });
+
+            const options = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+                ? { mimeType: "audio/webm;codecs=opus" }
+                : {};
+
+            mediaRecorder = new MediaRecorder(recordingStream, options);
+            audioChunks = [];
+
+            console.log("Recording format:", mediaRecorder.mimeType);
+
+            mediaRecorder.addEventListener("dataavailable", (event) => {
+                if (event.data.size > 0) {
+                    audioChunks.push(event.data);
+                }
+            });
+
+            mediaRecorder.addEventListener("stop", async () => {
+                try {
+                    recordingStatus.textContent = "Sending audio for transcription...";
+
+                    const audioBlob = new Blob(audioChunks, {
+                        type: mediaRecorder.mimeType
+                    });
+                    console.log("Audio chunks:", audioChunks.length);
+console.log("Audio blob size:", audioBlob.size);
+console.log("Audio blob type:", audioBlob.type);
+                    if (audioBlob.size === 0) {
+                        throw new Error("Recording did not contain any audio data");
+                    }
+
+                    const formData = new FormData();
+                    formData.append("audio", audioBlob, "recording.webm");
+
+                    const response = await fetch("/transcribe-audio", {
+                        method: "POST",
+                        body: formData
+                    });
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.error || "Transcription failed");
+                    }
+
+                    console.log("Transcript received:", result.transcript);
+                    transcriptResult.textContent = result.transcript;
+
+                    socket.emit("transcript", {
+                        interviewId: interviewId,
+                        text: result.transcript,
+                        speaker: "candidate"
+                    });
+
+                    recordingStatus.textContent = "Transcription completed.";
+                } catch (error) {
+                    console.error("Transcription error:", error);
+                    recordingStatus.textContent = "Transcription failed.";
+                } finally {
+                    if (recordingStream) {
+                        recordingStream.getTracks().forEach((track) => track.stop());
+                        recordingStream = null;
+                    }
+
+                    startRecordingBtn.disabled = false;
+                    stopRecordingBtn.disabled = true;
+                }
+            });
+
+            mediaRecorder.start();
+            recordingStatus.textContent = "Recording...";
+            startRecordingBtn.disabled = true;
+            stopRecordingBtn.disabled = false;
+        } catch (error) {
+            console.error("Microphone error:", error);
+            recordingStatus.textContent = "Could not access microphone.";
+
+            if (recordingStream) {
+                recordingStream.getTracks().forEach((track) => track.stop());
+                recordingStream = null;
+            }
+        }
+    });
+
+    stopRecordingBtn.addEventListener("click", () => {
+        if (mediaRecorder && mediaRecorder.state !== "inactive") {
+            mediaRecorder.stop();
+            recordingStatus.textContent = "Processing audio...";
+            stopRecordingBtn.disabled = true;
+        }
+    });
+
+</script>
+
+</body>
+</html>
+
+============================================================
+FILE: create-interview.ejs
+============================================================
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Interview</title>
+</head>
+<body>
+
+    <h1>Create Interview</h1>
+
+    <form action="/create-interview" method="POST">
+
+        <label>Candidate Name</label>
+        <input
+            type="text"
+            name="candidateName"
+            required
+        >
+
+        <br><br>
+
+        <label>Candidate Email</label>
+        <input
+            type="email"
+            name="candidateEmail"
+            required
+        >
+
+        <br><br>
+
+        <label>Position</label>
+        <input
+            type="text"
+            name="position"
+            placeholder="e.g. Software Developer"
+            required
+        >
+
+        <br><br>
+
+        <button type="submit">
+            Create Interview
+        </button>
+
+    </form>
+
+    <br>
+
+    <a href="/dashboard">Back to Dashboard</a>
+
+</body>
+</html>
+
+============================================================
+FILE: create-job.ejs
+============================================================
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Hiring Role</title>
+</head>
+
+<body>
+
+    <h1>Create Hiring Role</h1>
+
+    <form action="/create-job" method="POST">
+
+        <div>
+            <label>Job Title</label>
+            <input
+                type="text"
+                name="title"
+                placeholder="e.g. Frontend Developer"
+                required
+            >
+        </div>
+
+        <br>
+
+        <div>
+            <label>Job Description</label>
+            <textarea
+                name="description"
+                placeholder="Enter job description"
+                required
+            ></textarea>
+        </div>
+
+        <br>
+
+        <button type="submit">
+            Create Hiring Role
+        </button>
+
+    </form>
+
+    <br>
+
+    <a href="/dashboard">Back to Dashboard</a>
+
+</body>
+</html>
+
+============================================================
+FILE: dashboard.ejs
+============================================================
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+</head>
+
+<body>
+
+    <h1>Interview Dashboard</h1>
+
+    <a href="/create-interview">Create Interview</a>
+
+    <h2>Your Interviews</h2>
+
+    <% if (interviews.length === 0) { %>
+
+        <p>No interviews created yet.</p>
+
+    <% } else { %>
+
+        <% interviews.forEach(interview => { %>
+
+            <div>
+                <h3><%= interview.candidateName %></h3>
+
+                <p>
+                    Email: <%= interview.candidateEmail %>
+                </p>
+
+                <p>
+                    Position: <%= interview.position %>
+                </p>
+
+                <p>
+                    Status: <%= interview.status %>
+                </p>
+
+                <hr>
+            </div>
+
+        <% }) %>
+
+    <% } %>
+    <h2>My Jobs</h2>
+
+<% if (jobs && jobs.length > 0) { %>
+
+    <% jobs.forEach(job => { %>
+
+        <div>
+            <h3><%= job.title %></h3>
+            <p><%= job.description %></p>
+        </div>
+
+    <% }) %>
+
+<% } else { %>
+
+    <p>No jobs created yet.</p>
+
+<% } %>
+
+</body>
+</html>
+
+============================================================
+FILE: evaluation.ejs
+============================================================
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Evaluation</title>
+</head>
+
+<body>
+
+    <h1>Interview Evaluation</h1>
+
+    <hr>
+
+    <h2>Candidate</h2>
+
+    <p>
+        <strong>Name:</strong>
+        <%= interview.application.candidate.name %>
+    </p>
+
+    <p>
+        <strong>Email:</strong>
+        <%= interview.application.candidate.email %>
+    </p>
+
+    <h2>Position</h2>
+
+    <p>
+        <%= interview.application.job.title %>
+    </p>
+
+    <hr>
+
+    <form
+        method="POST"
+        action="/interview-room/<%= interview._id %>/evaluation"
+    >
+
+        <h3>Technical Skills</h3>
+
+        <select name="technicalSkills" required>
+            <option value="">Select rating</option>
+            <option value="1">1 - Poor</option>
+            <option value="2">2 - Below Average</option>
+            <option value="3">3 - Average</option>
+            <option value="4">4 - Good</option>
+            <option value="5">5 - Excellent</option>
+        </select>
+
+        <h3>Communication</h3>
+
+        <select name="communication" required>
+            <option value="">Select rating</option>
+            <option value="1">1 - Poor</option>
+            <option value="2">2 - Below Average</option>
+            <option value="3">3 - Average</option>
+            <option value="4">4 - Good</option>
+            <option value="5">5 - Excellent</option>
+        </select>
+
+        <h3>Problem Solving</h3>
+
+        <select name="problemSolving" required>
+            <option value="">Select rating</option>
+            <option value="1">1 - Poor</option>
+            <option value="2">2 - Below Average</option>
+            <option value="3">3 - Average</option>
+            <option value="4">Good</option>
+            <option value="5">Excellent</option>
+        </select>
+
+        <h3>Overall Rating</h3>
+
+        <select name="overallRating" required>
+            <option value="">Select rating</option>
+            <option value="1">1 - Poor</option>
+            <option value="2">2 - Below Average</option>
+            <option value="3">3 - Average</option>
+            <option value="4">4 - Good</option>
+            <option value="5">5 - Excellent</option>
+        </select>
+
+        <h3>Comments</h3>
+
+        <textarea
+            name="comments"
+            rows="6"
+            cols="60"
+            placeholder="Write your overall interview comments..."
+        ></textarea>
+
+        <br><br>
+
+        <button type="submit">
+            Save Evaluation
+        </button>
+
+    </form>
+
+</body>
+
+</html>
+
+============================================================
+FILE: interview-report.ejs
+============================================================
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Final Interview Report</title>
+</head>
+
+<body>
+
+    <h1>Final Interview Report</h1>
+
+    <hr>
+
+    <h2>Candidate Information</h2>
+
+    <p>
+        <strong>Name:</strong>
+        <%= interview.application.candidate.name %>
+    </p>
+
+    <p>
+        <strong>Email:</strong>
+        <%= interview.application.candidate.email %>
+    </p>
+
+    <h2>Position</h2>
+
+    <p>
+        <%= interview.application.job.title %>
+    </p>
+
+    <hr>
+
+    <h2>Interview Details</h2>
+
+    <p>
+        <strong>Interview ID:</strong>
+        <%= interview._id %>
+    </p>
+
+    <p>
+        <strong>Scheduled At:</strong>
+        <%= interview.scheduledAt %>
+    </p>
+
+    <p>
+        <strong>Status:</strong>
+        <%= interview.status %>
+    </p>
+
+    <hr>
+
+    <h2>Interviewer Evaluation</h2>
+
+    <% if (evaluation) { %>
+
+        <p>
+            <strong>Technical Skills:</strong>
+            <%= evaluation.technicalSkills %>/5
+        </p>
+
+        <p>
+            <strong>Communication:</strong>
+            <%= evaluation.communication %>/5
+        </p>
+
+        <p>
+            <strong>Problem Solving:</strong>
+            <%= evaluation.problemSolving %>/5
+        </p>
+
+        <p>
+            <strong>Overall Rating:</strong>
+            <%= evaluation.overallRating %>/5
+        </p>
+
+        <p>
+            <strong>Comments:</strong>
+            <%= evaluation.comments %>
+        </p>
+
+    <% } else { %>
+
+        <p>Evaluation has not been completed.</p>
+
+    <% } %>
+
+    <hr>
+
+    <h2>Interviewer Notes</h2>
+
+    <% if (notes.length > 0) { %>
+
+        <% notes.forEach(note => { %>
+
+            <p>
+                <strong>
+                    <%= note.createdAt %>
+                </strong>
+            </p>
+
+            <p>
+                <%= note.text %>
+            </p>
+
+            <hr>
+
+        <% }); %>
+
+    <% } else { %>
+
+        <p>No interviewer notes were recorded.</p>
+
+    <% } %>
+
+    <h2>Interview Transcript</h2>
+
+    <% if (transcripts.length > 0) { %>
+
+        <% transcripts.forEach(transcript => { %>
+
+            <p>
+                <strong>
+                    <%= transcript.speaker %>
+                </strong>
+                -
+                <%= transcript.timestamp %>
+            </p>
+
+            <p>
+                <%= transcript.text %>
+            </p>
+
+            <hr>
+
+        <% }); %>
+
+    <% } else { %>
+
+        <p>No transcript was recorded.</p>
+
+    <% } %>
+
+    <hr>
+
+    <h2>AI Summary</h2>
+
+    <% if (summary) { %>
+
+        <h3>Strengths</h3>
+
+        <p>
+            <%= summary.strengths %>
+        </p>
+
+        <h3>Weaknesses</h3>
+
+        <p>
+            <%= summary.weaknesses %>
+        </p>
+
+        <h3>Technical Assessment</h3>
+
+        <p>
+            <%= summary.technicalAssessment %>
+        </p>
+
+        <h3>Overall Assessment</h3>
+
+        <p>
+            <%= summary.overallAssessment %>
+        </p>
+
+        <h3>Recommendation</h3>
+
+        <p>
+            <%= summary.recommendation %>
+        </p>
+
+    <% } else { %>
+
+        <p>
+            AI Summary has not been generated yet.
+        </p>
+
+    <% } %>
+
+    <hr>
+
+    <a href="/interview-room/<%= interview._id %>">
+        Back to Interview
+    </a>
+
+</body>
+
+</html>
+
+============================================================
+FILE: interview-room.ejs
+============================================================
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Room</title>
+    <style>
+        .window-role {
+            display: inline-block;
+            margin: 16px 0 8px;
+            padding: 8px 12px;
+            border-left: 4px solid #a34f00;
+            background: #fff2df;
+            color: #713800;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="window-role" role="status" aria-label="Current interview window: interviewer">
+        Interviewer Window
+    </div>
+
+    <h1>Interview Room</h1>
+
+    <hr>
+
+    <h2>Candidate</h2>
+
+    <p>
+        <strong>Name:</strong>
+        <%= interview.application.candidate.name %>
+    </p>
+
+    <p>
+        <strong>Email:</strong>
+        <%= interview.application.candidate.email %>
+    </p>
+
+    <hr>
+
+    <h2>Job</h2>
+
+    <p>
+        <strong>Position:</strong>
+        <%= interview.application.job.title %>
+    </p>
+
+    <p>
+        <strong>Description:</strong>
+        <%= interview.application.job.description %>
+    </p>
+
+    <hr>
+
+    <h2>Interview Details</h2>
+
+    <p>
+        <strong>Scheduled At:</strong>
+        <%= interview.scheduledAt %>
+    </p>
+
+    <p>
+        <strong>Status:</strong>
+        <%= interview.status %>
+    </p>
+
+    <hr>
+
+    <h2>Interview Schedule</h2>
+<h2>Interview Status</h2>
+
+<% if (interview.status === "scheduled") { %>
+
+    <h3 id="countdownTitle">Interview starts in</h3>
+
+    <p id="countdown">
+        <span id="hours">00</span> :
+        <span id="minutes">00</span> :
+        <span id="seconds">00</span>
+    </p>
+
+    <p id="statusMessage">
+        Please wait until the scheduled interview time.
+    </p>
+
+    <hr>
+
+    <h2>Candidate Consent</h2>
+
+    <p>
+        Before starting the interview, the candidate must give
+        consent for the interview to be recorded and transcribed.
+    </p>
+
+    <label>
+        <input type="checkbox" id="consentCheckbox">
+        I confirm that the candidate has given consent
+        for the interview to be recorded and transcribed.
+    </label>
+
+    <br><br>
+
+    <form
+        action="/interview-room/<%= interview._id %>/start"
+        method="POST"
+    >
+        <button
+            id="startInterviewBtn"
+            type="submit"
+            disabled
+        >
+            Start Interview
+        </button>
+    </form>
+
+    <p id="waitingMessage">
+        Please wait until the scheduled interview time.
+    </p>
+
+<% } else if (interview.status === "ongoing") { %>
+
+    <h3>Interview is currently ongoing</h3>
+
+    <p>
+        The interview has started successfully.
+    </p>
+<form
+    action="/interview-room/<%= interview._id %>/end"
+    method="POST"
+>
+    <button type="submit">
+        End Interview
+    </button>
+</form>
+
+<% } else if (interview.status === "completed") { %>
+
+    <h3>Interview completed</h3>
+
+    <a href="/interview-room/<%= interview._id %>/evaluation">
+        Evaluate Interview
+    </a>
+
+    <br><br>
+
+    <a href="/interview-room/<%= interview._id %>/summary">
+        View AI Summary
+    </a>
+
+    <br><br>
+
+    <form
+        action="/interview-room/<%= interview._id %>/generate-summary"
+        method="POST"
+    >
+        <button type="submit">
+            Generate AI Summary
+        </button>
+    </form>
+<br><br>
+
+<a href="/interview-room/<%= interview._id %>/report">
+    View Final Interview Report
+</a>
+
+<% } else if (interview.status === "cancelled") { %>
+
+    <h3>Interview cancelled</h3>
+
+<% } %>
+<hr>
+
+<h2>Live Transcript</h2>
+
+<div id="transcript">
+
+    <% transcripts.forEach(item => { %>
+
+        <p>
+            <strong><%= item.speaker %>:</strong>
+            <%= item.text %>
+        </p>
+
+    <% }) %>
+
+</div>
+<br>
+
+<hr>
+
+<h2>AI Follow-up Questions</h2>
+
+<div id="follow-up-questions">
+    <p>No follow-up questions yet.</p>
+</div>
+<hr>
+
+<h2>Interviewer Notes</h2>
+
+<form method="POST" action="/interview-room/<%= interview._id %>/note">
+
+    <textarea
+        name="text"
+        rows="5"
+        cols="60"
+        placeholder="Write your notes about the candidate..."
+        required
+    ></textarea>
+
+    <br><br>
+
+    <button type="submit">Save Note</button>
+
+</form>
+
+<h3>Previous Notes</h3>
+
+<div id="notes">
+
+    <% if (notes && notes.length > 0) { %>
+
+        <% notes.forEach(note => { %>
+
+            <p>
+                <%= note.text %>
+            </p>
+
+        <% }) %>
+
+    <% } else { %>
+
+        <p>No notes yet.</p>
+
+    <% } %>
+
+</div>
+
+<input
+    type="text"
+    id="transcriptInput"
+    placeholder="Enter transcript text"
+>
+
+<button id="sendTranscriptBtn">
+    Send Transcript
+</button>
+
+<hr>
+
+<h2>Interview Media</h2>
+
+<video
+    id="localVideo"
+    autoplay
+    muted
+    playsinline
+    width="400"
+></video>
+
+<br><br>
+
+<button id="enableMediaBtn">
+    Enable Camera & Microphone
+</button>
+
+<p id="mediaStatus"></p>
+
+<h3>Interviewer</h3>
+
+<video
+    id="localVideo"
+    autoplay
+    muted
+    playsinline
+    width="400">
+</video>
+
+<h3>Candidate</h3>
+
+<video
+    id="remoteVideo"
+    autoplay
+    playsinline
+    width="400">
+</video>
+
+
+
+<% if (interview.status === "scheduled") { %>
+    <script>
+
+        /*
+         * Get the scheduled interview time
+         * from the Interview document.
+         */
+        const scheduledTime = new Date(
+            "<%= interview.scheduledAt.toISOString() %>"
+        ).getTime();
+
+
+        /*
+         * Get HTML elements.
+         */
+        const countdownTitle =
+            document.getElementById("countdownTitle");
+
+        const hoursElement =
+            document.getElementById("hours");
+
+        const minutesElement =
+            document.getElementById("minutes");
+
+        const secondsElement =
+            document.getElementById("seconds");
+
+        const statusMessage =
+            document.getElementById("statusMessage");
+
+        const consentCheckbox =
+            document.getElementById("consentCheckbox");
+
+        const startInterviewBtn =
+            document.getElementById("startInterviewBtn");
+
+        const waitingMessage =
+            document.getElementById("waitingMessage");
+
+
+        /*
+         * Indicates whether the scheduled
+         * interview time has arrived.
+         */
+        let interviewTimeReached = false;
+
+
+        /*
+         * Enable/disable Start Interview button.
+         */
+        function updateStartButton() {
+
+    if (!startInterviewBtn || !consentCheckbox) {
+        return;
+    }
+
+            startInterviewBtn.disabled = !(
+                interviewTimeReached && consentCheckbox.checked
+            );
+
+            if (!interviewTimeReached) {
+                waitingMessage.textContent =
+                    "Please wait until the scheduled interview time.";
+            } else if (!consentCheckbox.checked) {
+                waitingMessage.textContent =
+                    "Please confirm candidate consent to continue.";
+            } else {
+                waitingMessage.textContent =
+                    "The interview is ready to start.";
+            }
+        }
+
+
+        /*
+         * Update countdown.
+         */
+        function updateCountdown() {
+
+            const currentTime = Date.now();
+
+            const difference =
+                scheduledTime - currentTime;
+
+
+            /*
+             * Interview time has arrived.
+             */
+            if (difference <= 0) {
+
+                interviewTimeReached = true;
+
+                countdownTitle.textContent =
+                    "Interview is ready to start";
+
+                hoursElement.textContent = "00";
+                minutesElement.textContent = "00";
+                secondsElement.textContent = "00";
+
+                statusMessage.textContent =
+                    "The scheduled interview time has arrived.";
+
+                updateStartButton();
+
+                return;
+            }
+
+
+            /*
+             * Convert remaining milliseconds
+             * into hours, minutes and seconds.
+             */
+            const totalSeconds =
+                Math.floor(difference / 1000);
+
+            const hours =
+                Math.floor(totalSeconds / 3600);
+
+            const minutes =
+                Math.floor(
+                    (totalSeconds % 3600) / 60
+                );
+
+            const seconds =
+                totalSeconds % 60;
+
+
+            /*
+             * Display countdown.
+             */
+            hoursElement.textContent =
+                String(hours).padStart(2, "0");
+
+            minutesElement.textContent =
+                String(minutes).padStart(2, "0");
+
+            secondsElement.textContent =
+                String(seconds).padStart(2, "0");
+
+            updateStartButton();
+        }
+
+
+        /*
+         * When consent changes,
+         * check whether Start Interview
+         * can be enabled.
+         */
+        consentCheckbox.addEventListener(
+            "change",
+            updateStartButton
+        );
+
+
+        /*
+         * Run once immediately.
+         */
+        updateCountdown();
+
+
+        /*
+         * Update countdown every second.
+         */
+        if (!interviewTimeReached) {
+            const countdownTimer = setInterval(
+                () => {
+                    updateCountdown();
+
+                    if (interviewTimeReached) {
+                        clearInterval(countdownTimer);
+                    }
+                },
+                1000
+            );
+        }
+
+    </script>
+<% } %>
+
+    <script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+
+    const interviewId = "<%= interview._id %>";
+
+    socket.on("connect", () => {
+        console.log("Connected to Socket.IO:", socket.id);
+
+        socket.emit("join-interview", {
+            interviewId,
+            role: "interviewer"
+        });
+    });
+
+    socket.on("interview-participant-connected", (participant) => {
+        if (participant.role === "candidate") {
+            console.log(
+                "Candidate connected to Socket.IO:",
+                participant.socketId
+            );
+        }
+    });
+
+    socket.on("candidate-media-enabled", () => {
+        console.log("Candidate camera and microphone enabled");
+    });
+
+    socket.on("disconnect", () => {
+        console.log("Disconnected from Socket.IO");
+    });
+
+
+    // -------------------------
+    // TRANSCRIPT
+    // -------------------------
+
+    const transcriptInput =
+        document.getElementById("transcriptInput");
+
+    const sendTranscriptBtn =
+        document.getElementById("sendTranscriptBtn");
+
+    const transcript =
+        document.getElementById("transcript");
+
+    sendTranscriptBtn.addEventListener("click", () => {
+
+        const text = transcriptInput.value.trim();
+
+        if (!text) {
+            return;
+        }
+
+        socket.emit("transcript", {
+            interviewId: interviewId,
+            text: text
+        });
+
+        transcriptInput.value = "";
+    });
+socket.on("transcript", (data) => {
+
+    console.log("INTERVIEWER RECEIVED TRANSCRIPT:", data);
+
+    const paragraph = document.createElement("p");
+
+    paragraph.textContent =
+        `${data.speaker}: ${data.text}`;
+
+    transcript.appendChild(paragraph);
+
+});
+
+socket.on("follow-up-questions", (data) => {
+
+    console.log(
+        "INTERVIEWER RECEIVED FOLLOW-UP QUESTIONS:",
+        data.questions
+    );
+
+    const container = document.getElementById("follow-up-questions");
+
+    container.innerHTML = "";
+
+    const questions = data.questions.split("\n");
+
+    questions.forEach(question => {
+
+        const paragraph = document.createElement("p");
+
+        paragraph.textContent = question;
+
+        container.appendChild(paragraph);
+    });
+
+});
+
+
+    // -------------------------
+    // CAMERA / MICROPHONE
+    // -------------------------
+
+    const localVideo =
+        document.getElementById("localVideo");
+
+    const enableMediaBtn =
+        document.getElementById("enableMediaBtn");
+
+    const mediaStatus =
+        document.getElementById("mediaStatus");
+
+    let localStream = null;
+
+    let peerConnection = null;
+    const remoteVideo=document.getElementById("remoteVideo");
+    console.log("Remote video element:", remoteVideo);
+
+
+    peerConnection=new RTCPeerConnection();
+
+peerConnection.addEventListener("track", (event) => {
+
+    console.log("Remote track received");
+    console.log("Track kind:", event.track.kind);
+    console.log("Track enabled:", event.track.enabled);
+    console.log("Track readyState:", event.track.readyState);
+
+    if (event.streams && event.streams[0]) {
+
+        remoteVideo.srcObject = event.streams[0];
+
+        console.log(
+            "Remote stream assigned:",
+            remoteVideo.srcObject
+        );
+
+        console.log(
+            "Remote video tracks:",
+            event.streams[0].getVideoTracks()
+        );
+
+        console.log(
+            "Remote audio tracks:",
+            event.streams[0].getAudioTracks()
+        );
+    }
+});
+    // -------------------------
+    // INTERVIEWER STARTS WEBRTC
+    // -------------------------
+
+    enableMediaBtn.addEventListener("click", async () => {
+
+        try {
+
+            localStream =
+                await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: true
+                });
+
+            localVideo.srcObject = localStream;
+
+
+            // Create PeerConnection
+            peerConnection = new RTCPeerConnection();
+
+
+            // -------------------------
+            // ICE CANDIDATE LISTENER
+    peerConnection.addEventListener("track", (event) => {
+
+    console.log("Remote track received");
+
+    console.log("Track kind:", event.track.kind);
+    console.log("Track enabled:", event.track.enabled);
+    console.log("Track readyState:", event.track.readyState);
+
+    if (event.streams && event.streams[0]) {
+
+        remoteVideo.srcObject = event.streams[0];
+
+        console.log(
+            "Remote stream assigned:",
+            remoteVideo.srcObject
+        );
+
+        console.log(
+            "Remote video tracks:",
+            event.streams[0].getVideoTracks()
+        );
+
+        console.log(
+            "Remote audio tracks:",
+            event.streams[0].getAudioTracks()
+        );
+    }
+});
+
+            peerConnection.addEventListener(
+                "icecandidate",
+                (event) => {
+
+                    if (event.candidate) {
+
+                        socket.emit("webrtc-ice-candidate", {
+                            interviewId: interviewId,
+                            candidate: event.candidate
+                        });
+
+                        console.log(
+                            "Interviewer ICE candidate sent"
+                        );
+                    }
+
+                }
+            );
+
+
+            // Add camera and microphone tracks
+            localStream.getTracks().forEach((track) => {
+
+                peerConnection.addTrack(
+                    track,
+                    localStream
+                );
+
+            });
+
+
+            // Create offer
+            const offer =
+                await peerConnection.createOffer();
+
+
+            await peerConnection.setLocalDescription(
+                offer
+            );
+
+
+            // Send offer to candidate
+            socket.emit("webrtc-offer", {
+
+                interviewId: interviewId,
+
+                offer:
+                    peerConnection.localDescription
+
+            });
+
+
+            console.log("WebRTC offer sent");
+
+
+            mediaStatus.textContent =
+                "Camera and microphone enabled.";
+
+            enableMediaBtn.disabled = true;
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            mediaStatus.textContent =
+                "Camera or microphone permission was denied.";
+
+        }
+
+    });
+
+
+    // -------------------------
+    // RECEIVE WEBRTC ANSWER
+    // -------------------------
+
+    socket.on("webrtc-answer", async (data) => {
+
+        try {
+
+            await peerConnection.setRemoteDescription(
+                data.answer
+            );
+
+            console.log(
+                "WebRTC answer received"
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Failed to apply WebRTC answer:",
+                error
+            );
+
+        }
+
+    });
+
+
+    // -------------------------
+    // RECEIVE ICE CANDIDATE
+    // -------------------------
+
+    socket.on(
+        "webrtc-ice-candidate",
+        async (data) => {
+
+            try {
+
+                await peerConnection.addIceCandidate(
+                    data.candidate
+                );
+
+                console.log(
+                    "Interviewer ICE candidate received"
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Failed to add interviewer ICE candidate:",
+                    error
+                );
+
+            }
+
+        }
+    );
+
+
+</script>
+
+</body>
+
+</html>
+```
+
+============================================================
+FILE: interview-summary.ejs
+============================================================
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Interview Summary</title>
+</head>
+
+<body>
+
+    <h1>AI Interview Summary</h1>
+
+    <hr>
+
+    <h2>Candidate</h2>
+
+    <p>
+        <strong>Name:</strong>
+        <%= interview.application.candidate.name %>
+    </p>
+
+    <p>
+        <strong>Email:</strong>
+        <%= interview.application.candidate.email %>
+    </p>
+
+    <h2>Position</h2>
+
+    <p>
+        <%= interview.application.job.title %>
+    </p>
+
+    <hr>
+
+    <h2>Strengths</h2>
+
+    <p>
+        <%= summary.strengths %>
+    </p>
+
+    <h2>Weaknesses</h2>
+
+    <p>
+        <%= summary.weaknesses %>
+    </p>
+
+    <h2>Technical Assessment</h2>
+
+    <p>
+        <%= summary.technicalAssessment %>
+    </p>
+
+    <h2>Overall Assessment</h2>
+
+    <p>
+        <%= summary.overallAssessment %>
+    </p>
+
+    <h2>Recommendation</h2>
+
+    <p>
+        <%= summary.recommendation %>
+    </p>
+
+    <hr>
+
+    <a href="/interview-room/<%= interview._id %>">
+        Back to Interview
+    </a>
+
+</body>
+
+</html>
+
+============================================================
+FILE: jobs.ejs
+============================================================
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Hiring Roles</title>
+</head>
+
+<body>
+
+    <h1>My Hiring Roles</h1>
+
+    <a href="/create-job">Create New Hiring Role</a>
+
+    <hr>
+
+    <% if (jobs.length === 0) { %>
+
+        <p>You haven't created any hiring roles yet.</p>
+
+    <% } else { %>
+
+        <% jobs.forEach(job => { %>
+
+            <div>
+                <h2><%= job.title %></h2>
+
+                <p>
+                    <%= job.description %>
+                </p>
+
+                <p>
+                    Status: <%= job.status %>
+                </p>
+
+                <hr>
+                <a href="/jobs/<%= job._id %>/applicants">
+    View Applicants
+</a>
+            </div>
+
+        <% }) %>
+
+    <% } %>
+
+    <a href="/dashboard">Back to Dashboard</a>
+
+</body>
+</html>
+
+============================================================
+FILE: login.ejs
+============================================================
+<form action="/login" method="POST">
+
+    <input
+        type="email"
+        name="email"
+        placeholder="Email"
+        required
+    >
+
+    <br><br>
+
+    <input
+        type="password"
+        name="password"
+        placeholder="Password"
+        required
+    >
+
+    <br><br>
+
+    <button type="submit">Login</button>
+
+</form>
+
+<br>
+
+<a href="/register">Create an account</a>
+
+============================================================
+FILE: my-applications.ejs
+============================================================
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Applications</title>
+</head>
+
+<body>
+
+    <h1>My Applications</h1>
+
+    <% if (applications.length === 0) { %>
+
+        <p>You have not applied for any jobs yet.</p>
+
+    <% } else { %>
+
+        <% applications.forEach(application => { %>
+
+            <hr>
+
+            <h2>
+                <%= application.job.title %>
+            </h2>
+
+            <p>
+                <strong>Description:</strong>
+                <%= application.job.description %>
+            </p>
+
+            <p>
+                <strong>Application Status:</strong>
+                <%= application.status %>
+                <%
+    const interview = interviews.find(item =>
+        item.application &&
+        item.application._id.toString() ===
+        application._id.toString()
+    );
+%>
+
+<% if (interview) { %>
+
+    <h3>Interview Scheduled</h3>
+
+    <p>
+        <strong>Date:</strong>
+        <%= interview.scheduledAt.toLocaleDateString() %>
+    </p>
+
+    <p>
+        <strong>Time:</strong>
+        <%= interview.scheduledAt.toLocaleTimeString() %>
+    </p>
+
+    <p>
+        <strong>Interview Status:</strong>
+        <%= interview.status %>
+    </p>
+
+    <% if (interview.status === "scheduled") { %>
+
+        <a href="/candidate-interview/<%= interview._id %>">
+            Join Interview
+        </a>
+
+    <% } else if (interview.status === "ongoing") { %>
+
+        <a href="/candidate-interview/<%= interview._id %>">
+            Join Ongoing Interview
+        </a>
+
+    <% } %>
+
+<% } %>
+            </p>
+
+            <p>
+                <strong>Applied On:</strong>
+                <%= application.createdAt.toLocaleString() %>
+            </p>
+
+        <% }) %>
+
+    <% } %>
+
+</body>
+</html>
+
+============================================================
+FILE: register.ejs
+============================================================
+<form action="/register" method="POST">
+
+    <input
+        type="text"
+        name="name"
+        placeholder="Name"
+        required
+    >
+
+    <input
+        type="email"
+        name="email"
+        placeholder="Email"
+        required
+    >
+
+    <input
+        type="password"
+        name="password"
+        placeholder="Password"
+        required
+    >
+
+    <label>Account Type</label>
+
+    <select name="role" required>
+        <option value="">Select account type</option>
+        <option value="candidate">Candidate</option>
+        <option value="interviewer">Interviewer</option>
+    </select>
+
+    <button type="submit">Register</button>
+
+</form>
+
+<a href="/">Already have an account? Login</a>
+
+============================================================
+FILE: schedule-interview.ejs
+============================================================
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Schedule Interview</title>
+</head>
+<body>
+
+```
+<h1>Schedule Interview</h1>
+
+<h2>Candidate</h2>
+
+<p>
+    Name:
+    <%= application.candidate.name %>
+</p>
+
+<p>
+    Email:
+    <%= application.candidate.email %>
+</p>
+
+<h2>Job</h2>
+
+<p>
+    Position:
+    <%= application.job.title %>
+</p>
+
+<form
+    action="/schedule-interview/<%= application._id %>"
+    method="POST"
+>
+
+    <label for="scheduledAt">
+        Interview Date and Time
+    </label>
+
+    <br>
+
+    <input
+        type="datetime-local"
+        id="scheduledAt"
+        name="scheduledAt"
+        required
+    >
+
+    <br><br>
+
+    <button type="submit">
+        Schedule Interview
+    </button>
+
+</form>
+
+<br>
+
+<a href="/jobs/<%= application.job._id %>/applicants">
+    Back to Applicants
+</a>
+```
+
+</body>
+</html>
