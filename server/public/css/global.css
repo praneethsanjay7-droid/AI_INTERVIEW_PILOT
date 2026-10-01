@@ -239,6 +239,61 @@ a:hover {
   border: 1px solid #C7D2FE;
 }
 
+/* User Profile Badge in Navigation */
+.ip-user-profile-widget {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.25rem 0.75rem 0.25rem 0.375rem;
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  margin-left: 0.5rem;
+}
+
+.ip-user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  color: #FFFFFF;
+  flex-shrink: 0;
+}
+
+.ip-avatar-interviewer {
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25);
+}
+
+.ip-avatar-candidate {
+  background: linear-gradient(135deg, #10B981, #059669);
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+}
+
+.ip-user-meta-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.ip-user-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.ip-user-role-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
 /* Page Header */
 .ip-page-header {
   margin-bottom: 2rem;

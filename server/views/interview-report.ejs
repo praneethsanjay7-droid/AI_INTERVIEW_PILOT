@@ -21,13 +21,30 @@
                 <span>Interview<span class="ip-brand-accent">Pilot</span></span>
             </a>
 
-            <nav>
+            <nav style="display: flex; align-items: center; gap: 0.75rem;">
                 <ul class="ip-nav-links">
                     <li><a href="/dashboard" class="ip-nav-link">Dashboard</a></li>
-                    <li><a href="/jobs" class="ip-nav-link active">Hiring Roles</a></li>
-                    <li><a href="/available-jobs" class="ip-nav-link">Available Jobs</a></li>
-                    <li><a href="/my-applications" class="ip-nav-link">My Applications</a></li>
+                    <li><a href="/jobs" class="ip-nav-link">Hiring Roles</a></li>
+                    <li><a href="/create-job" class="ip-nav-link">+ Create Role</a></li>
                 </ul>
+
+                <% 
+                    const currentUser = typeof user !== 'undefined' && user ? user : null;
+                    const isCandidate = currentUser && currentUser.role === 'candidate';
+                    const roleLetter = isCandidate ? 'C' : 'I';
+                    const avatarClass = isCandidate ? 'ip-avatar-candidate' : 'ip-avatar-interviewer';
+                    const roleTitle = isCandidate ? (currentUser.name || 'Candidate') : (currentUser && currentUser.name ? currentUser.name : 'Interviewer');
+                    const roleSub = isCandidate ? 'Candidate' : 'Interviewer';
+                %>
+                <div class="ip-user-profile-widget" title="Logged in as <%= roleSub %>">
+                    <div class="ip-user-avatar <%= avatarClass %>">
+                        <%= roleLetter %>
+                    </div>
+                    <div class="ip-user-meta-text">
+                        <span class="ip-user-name"><%= roleTitle %></span>
+                        <span class="ip-user-role-label"><%= roleSub %></span>
+                    </div>
+                </div>
             </nav>
         </div>
     </header>

@@ -51,7 +51,9 @@ const loginUser=async(req,res)=>{
         const token=jwt.sign(
             {
                 userId:user._id,
-                email:user.email
+                email:user.email,
+                name:user.name,
+                role:user.role
             },
             "interviewpilot_secret",
             {

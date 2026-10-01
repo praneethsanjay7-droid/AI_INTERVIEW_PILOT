@@ -3,61 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In - InterviewPilot</title>
+    <title>InterviewPilot - AI-Powered Video Interview & Hiring Platform</title>
     <link rel="stylesheet" href="/css/global.css">
     <link rel="stylesheet" href="/css/login.css">
 </head>
-<body class="ip-auth-page">
+<body class="ip-landing-page">
 
-    <div class="ip-auth-container">
-        <div class="ip-auth-card">
-            <div class="ip-auth-header">
-                <div class="ip-auth-logo">
+    <!-- Landing Navigation Header -->
+    <header class="ip-landing-nav">
+        <div class="ip-container" style="display: flex; align-items: center; justify-content: space-between;">
+            <a href="/" class="ip-brand">
+                <div class="ip-brand-icon">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
                 </div>
-                <h1 class="ip-auth-title">Welcome back</h1>
-                <p class="ip-auth-subtitle">Sign in to your InterviewPilot workspace</p>
-            </div>
+                <span>Interview<span class="ip-brand-accent">Pilot</span></span>
+            </a>
 
-            <form class="ip-auth-form" action="/login" method="POST">
-                <div class="ip-form-group">
-                    <label class="ip-form-label" for="email">Email Address</label>
-                    <input
-                        id="email"
-                        class="ip-input"
-                        type="email"
-                        name="email"
-                        placeholder="you@company.com"
-                        autocomplete="email"
-                        required
-                    >
-                </div>
-
-                <div class="ip-form-group">
-                    <label class="ip-form-label" for="password">Password</label>
-                    <input
-                        id="password"
-                        class="ip-input"
-                        type="password"
-                        name="password"
-                        placeholder="••••••••"
-                        autocomplete="current-password"
-                        required
-                    >
-                </div>
-
-                <button class="ip-btn ip-btn-primary ip-btn-lg ip-btn-block" type="submit">
-                    Sign In
-                </button>
-            </form>
-
-            <div class="ip-auth-footer">
-                Don't have an account? <a href="/register">Create an account</a>
+            <div>
+                <a href="/register" class="ip-btn ip-btn-secondary ip-btn-sm">
+                    Create Account
+                </a>
             </div>
         </div>
-    </div>
+    </header>
+
+    <main class="ip-container">
+
+        <!-- Hero Section -->
+        <section class="ip-landing-hero">
+            <div class="ip-hero-pill">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Next-Gen AI Interview Platform
+            </div>
+            <h1 class="ip-landing-title">
+                Streamline hiring with real-time video, transcripts & AI assistance
+            </h1>
+            <p class="ip-landing-subtitle">
+                InterviewPilot provides purpose-built workflows for interviewers managing hiring pipelines and candidates attending structured video interviews.
+            </p>
+        </section>
+
+        <!-- Main Content Grid: Two Role Sections + Sign In Form -->
+        <div class="ip-landing-grid">
+
+            <!-- Left: Dedicated Role Sections -->
+            <div class="ip-roles-container">
+
+                <!-- 1. For Interviewers -->
+                <div class="ip-landing-role-card ip-role-card-interviewer">
+                    <div class="ip-role-card-header">
+                        <div>
+                            <span class="ip-role-card-badge ip-badge-interviewer-theme">
+                                👔 For Interviewers & Recruiters
+                            </span>
+                            <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--color-text-primary); margin-top: 0.5rem;">
+                                Manage hiring, conduct interviews & evaluate talent
+                            </h2>
+                        </div>
+                    </div>
+
+                    <ul class="ip-role-feature-list">
+                        <li class="ip-role-feature-item">
+                            <svg class="ip-icon-interviewer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span><strong>Create & manage hiring roles:</strong> Define job openings, requirements, and competency goals.</span>
+                        </li>
+                        <li class="ip-role-feature-item">
+                            <svg class="ip-icon-interviewer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span><strong>Review applicant resumes:</strong> Screen candidate PDF resumes and manage candidate pipelines.</span>
+                        </li>
+                        <li class="ip-role-feature-item">
+                            <svg class="ip-icon-interviewer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span><strong>Schedule video interviews:</strong> Set interview date & time with automated session generation.</span>
+                        </li>
+                        <li class="ip-role-feature-item">
+                            <svg class="ip-icon-interviewer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span><strong>AI Interview Command Center:</strong> WebRTC video feeds, live transcripts, and Gemini AI follow-up questions.</span>
+                        </li>
+                        <li class="ip-role-feature-item">
+                            <svg class="ip-icon-interviewer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span><strong>Scorecards & AI Reports:</strong> Rate technical & communication skills (1–5), generate AI debriefs, and export final reports.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 2. For Candidates -->
+                <div class="ip-landing-role-card ip-role-card-candidate">
+                    <div class="ip-role-card-header">
+                        <div>
+                            <span class="ip-role-card-badge ip-badge-candidate-theme">
+                                🎓 For Candidates & Job Seekers
+                            </span>
+                            <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--color-text-primary); margin-top: 0.5rem;">
+                                Discover open roles, apply with resume & attend interviews
+                            </h2>
+                        </div>
+                    </div>
+
+                    <ul class="ip-role-feature-list">
+                        <li class="ip-role-feature-item">
+                            <svg class="ip-icon-candidate" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span><strong>Browse available jobs:</strong> Explore open company positions, skill requirements, and descriptions.</span>
+                        </li>
+                        <li class="ip-role-feature-item">
+                            <svg class="ip-icon-candidate" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span><strong>One-click PDF resume application:</strong> Submit your resume directly to hiring managers.</span>
+                        </li>
+                        <li class="ip-role-feature-item">
+                            <svg class="ip-icon-candidate" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span><strong>Application tracking:</strong> Real-time progression pipeline (<em>Applied &rarr; Shortlisted &rarr; Interview &rarr; Completed</em>).</span>
+                        </li>
+                        <li class="ip-role-feature-item">
+                            <svg class="ip-icon-candidate" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span><strong>Interactive Candidate Interview Room:</strong> Video stage, microphone testing, and live speech-to-text.</span>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- Right: Sign In Form Box -->
+            <div class="ip-landing-login-box">
+                <div class="ip-auth-header">
+                    <div class="ip-auth-logo">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                        </svg>
+                    </div>
+                    <h2 class="ip-auth-title">Sign in to InterviewPilot</h2>
+                    <p class="ip-auth-subtitle">Select your account to access your workspace</p>
+                </div>
+
+                <form class="ip-auth-form" action="/login" method="POST">
+                    <div class="ip-form-group">
+                        <label class="ip-form-label" for="email">Email Address</label>
+                        <input
+                            id="email"
+                            class="ip-input"
+                            type="email"
+                            name="email"
+                            placeholder="you@company.com"
+                            autocomplete="email"
+                            required
+                        >
+                    </div>
+
+                    <div class="ip-form-group">
+                        <label class="ip-form-label" for="password">Password</label>
+                        <input
+                            id="password"
+                            class="ip-input"
+                            type="password"
+                            name="password"
+                            placeholder="••••••••"
+                            autocomplete="current-password"
+                            required
+                        >
+                    </div>
+
+                    <button class="ip-btn ip-btn-primary ip-btn-lg ip-btn-block" type="submit">
+                        Sign In
+                    </button>
+                </form>
+
+                <div class="ip-auth-footer">
+                    New to InterviewPilot? <a href="/register">Create an account</a>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
 
 </body>
 </html>

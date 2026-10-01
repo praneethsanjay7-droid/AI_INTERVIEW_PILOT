@@ -33,7 +33,17 @@
             </div>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.875rem;">
+            <div class="ip-room-user-profile ip-room-user-candidate" title="Currently in room as Candidate: <%= (typeof user !== 'undefined' && user && user.name) ? user.name : (interview.application && interview.application.candidate ? interview.application.candidate.name : 'Candidate') %>">
+                <div class="ip-room-user-avatar">
+                    C
+                </div>
+                <div class="ip-room-user-info">
+                    <span class="ip-room-user-name"><%= (typeof user !== 'undefined' && user && user.name) ? user.name : (interview.application && interview.application.candidate ? interview.application.candidate.name : 'Candidate') %></span>
+                    <span class="ip-room-user-tag">Candidate Room</span>
+                </div>
+            </div>
+
             <span class="ip-badge ip-badge-<%= interview.status %>"><%= interview.status %></span>
             <a href="/my-applications" class="ip-btn ip-btn-secondary ip-btn-sm" style="background: #334155; color: #FFFFFF; border-color: #475569;">
                 Back to Applications

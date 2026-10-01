@@ -1,55 +1,206 @@
-/* Login Page Stylesheet */
+/* Home & Login Page Stylesheet */
 
-.ip-auth-page {
+.ip-landing-page {
   min-height: 100vh;
+  background-color: var(--color-bg-app);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Landing Navigation Header */
+.ip-landing-nav {
+  background-color: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border-default);
+  padding: 1rem 0;
+  box-shadow: var(--shadow-xs);
+}
+
+.ip-landing-hero {
+  padding: 3.5rem 0 2rem;
+  text-align: center;
+}
+
+.ip-hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.875rem;
+  background-color: var(--color-primary-50);
+  border: 1px solid var(--color-primary-200);
+  border-radius: var(--radius-full);
+  color: var(--color-primary-700);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+}
+
+.ip-landing-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  margin-bottom: 1rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ip-landing-subtitle {
+  font-size: 1.125rem;
+  color: var(--color-text-secondary);
+  max-width: 680px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.6;
+}
+
+/* Main Split: Role Explanation Grid + Login Card */
+.ip-landing-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  margin-bottom: 4rem;
+}
+
+@media (min-width: 1024px) {
+  .ip-landing-grid {
+    grid-template-columns: 1.3fr 0.9fr;
+    align-items: start;
+  }
+}
+
+/* Role Capabilities Cards */
+.ip-roles-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.ip-landing-role-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  padding: 1.75rem 2rem;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.ip-landing-role-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary-200);
+}
+
+.ip-role-card-interviewer {
+  border-top: 4px solid #F59E0B;
+}
+
+.ip-role-card-candidate {
+  border-top: 4px solid #10B981;
+}
+
+.ip-role-card-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #F8FAFC 0%, #EEF2FF 100%);
-  padding: 2rem 1rem;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
 }
 
-.ip-auth-container {
-  width: 100%;
-  max-width: 440px;
+.ip-role-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.3125rem 0.75rem;
+  border-radius: var(--radius-full);
 }
 
-.ip-auth-card {
+.ip-badge-interviewer-theme {
+  background: #FEF3C7;
+  color: #92400E;
+  border: 1px solid #FDE68A;
+}
+
+.ip-badge-candidate-theme {
+  background: #ECFDF5;
+  color: #065F46;
+  border: 1px solid #A7F3D0;
+}
+
+.ip-role-feature-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.ip-role-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.ip-role-feature-item svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.ip-icon-interviewer {
+  color: #D97706;
+}
+
+.ip-icon-candidate {
+  color: #059669;
+}
+
+/* Login Auth Form Card */
+.ip-landing-login-box {
   background: var(--color-bg-surface);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
-  padding: 2.5rem 2rem;
+  padding: 2.25rem 2rem;
+  position: sticky;
+  top: 90px;
 }
 
 .ip-auth-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.75rem;
 }
 
 .ip-auth-logo {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--radius-lg);
   background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-700));
   color: #FFFFFF;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
 }
 
 .ip-auth-logo svg {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
 }
 
 .ip-auth-title {
-  font-size: 1.5rem;
+  font-size: 1.375rem;
   font-weight: 700;
   color: var(--color-text-primary);
-  margin-bottom: 0.375rem;
+  margin-bottom: 0.25rem;
 }
 
 .ip-auth-subtitle {
@@ -60,12 +211,12 @@
 .ip-auth-form {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.125rem;
 }
 
 .ip-auth-footer {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
   border-top: 1px solid var(--color-border-subtle);
   text-align: center;
   font-size: 0.875rem;
