@@ -22,7 +22,7 @@ const jobSchema=new Schema({
     },
     createdAt:{
         type:Date,
-        deafult:Date.now
+        default:Date.now
     }
 });
 

@@ -457,7 +457,9 @@
 
                     if (localVideo) localVideo.srcObject = localStream;
 
-                    peerConnection = new RTCPeerConnection();
+                    peerConnection = new RTCPeerConnection({
+                iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+            });
 
                     peerConnection.addEventListener("track", (event) => {
                         console.log("Remote track received");
