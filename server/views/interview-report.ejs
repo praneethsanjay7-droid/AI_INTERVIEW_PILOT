@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Final Interview Report</title>
+</head>
+
+<body>
+
+    <h1>Final Interview Report</h1>
+
+    <hr>
+
+    <h2>Candidate Information</h2>
+
+    <p>
+        <strong>Name:</strong>
+        <%= interview.application.candidate.name %>
+    </p>
+
+    <p>
+        <strong>Email:</strong>
+        <%= interview.application.candidate.email %>
+    </p>
+
+    <h2>Position</h2>
+
+    <p>
+        <%= interview.application.job.title %>
+    </p>
+
+    <hr>
+
+    <h2>Interview Details</h2>
+
+    <p>
+        <strong>Interview ID:</strong>
+        <%= interview._id %>
+    </p>
+
+    <p>
+        <strong>Scheduled At:</strong>
+        <%= interview.scheduledAt %>
+    </p>
+
+    <p>
+        <strong>Status:</strong>
+        <%= interview.status %>
+    </p>
+
+    <hr>
+
+    <h2>Interviewer Evaluation</h2>
+
+    <% if (evaluation) { %>
+
+        <p>
+            <strong>Technical Skills:</strong>
+            <%= evaluation.technicalSkills %>/5
+        </p>
+
+        <p>
+            <strong>Communication:</strong>
+            <%= evaluation.communication %>/5
+        </p>
+
+        <p>
+            <strong>Problem Solving:</strong>
+            <%= evaluation.problemSolving %>/5
+        </p>
+
+        <p>
+            <strong>Overall Rating:</strong>
+            <%= evaluation.overallRating %>/5
+        </p>
+
+        <p>
+            <strong>Comments:</strong>
+            <%= evaluation.comments %>
+        </p>
+
+    <% } else { %>
+
+        <p>Evaluation has not been completed.</p>
+
+    <% } %>
+
+    <hr>
+<h2>Interviewer Notes</h2>
+
+<% if (notes.length > 0) { %>
+
+    <% notes.forEach(note => { %>
+
+        <p>
+            <strong>
+                <%= note.createdAt %>
+            </strong>
+        </p>
+
+        <p>
+            <%= note.text %>
+        </p>
+
+        <hr>
+
+    <% }); %>
+
+<% } else { %>
+
+    <p>No interviewer notes were recorded.</p>
+
+<% } %>
+
+    <h2>Interview Transcript</h2>
+<h2>Interview Transcript</h2>
+
+<% if (transcripts.length > 0) { %>
+
+    <% transcripts.forEach(transcript => { %>
+
+        <p>
+            <strong>
+                <%= transcript.speaker %>
+            </strong>
+            -
+            <%= transcript.timestamp %>
+        </p>
+
+        <p>
+            <%= transcript.text %>
+        </p>
+
+        <hr>
+
+    <% }); %>
+
+<% } else { %>
+
+    <p>No transcript was recorded.</p>
+
+<% } %>
+
+    <hr>
+
+    <h2>AI Summary</h2>
+
+    <% if (summary) { %>
+
+        <h3>Strengths</h3>
+
+        <p>
+            <%= summary.strengths %>
+        </p>
+
+        <h3>Weaknesses</h3>
+
+        <p>
+            <%= summary.weaknesses %>
+        </p>
+
+        <h3>Technical Assessment</h3>
+
+        <p>
+            <%= summary.technicalAssessment %>
+        </p>
+
+        <h3>Overall Assessment</h3>
+
+        <p>
+            <%= summary.overallAssessment %>
+        </p>
+
+        <h3>Recommendation</h3>
+
+        <p>
+            <%= summary.recommendation %>
+        </p>
+
+    <% } else { %>
+
+        <p>
+            AI Summary has not been generated yet.
+        </p>
+
+    <% } %>
+
+    <hr>
+
+    <a href="/interview-room/<%= interview._id %>">
+        Back to Interview
+    </a>
+
+</body>
+
+</html>

@@ -683,6 +683,82 @@ const showInterviewSummary = async (req, res) => {
     }
 };
 
+const showInterviewReport = async (req, res) => {
+    try {
+        if (!mongoose.isValidObjectId(req.params.interviewId)) {
+            return res.status(404).send("Interview not found");
+        }
+
+        const interview = await Interview.findById(req.params.interviewId)
+            .populate({
+                path: "application",
+                populate: [
+                    {
+                        path: "candidate",
+                        select: "name email"
+                    },
+                    {
+                        path: "job",
+                        select: "title description createdBy"
+                    }
+                ]
+            });
+
+        if (!interview) {
+            return res.status(404).send("Interview not found");
+        }
+
+        if (
+            !isOwnedBy(interview.interviewer, req.user.userId) ||
+            !interview.application ||
+            !interview.application.job ||
+            !isOwnedBy(
+                interview.application.job.createdBy,
+                req.user.userId
+            )
+        ) {
+            return res.status(403).send(
+                "You are not authorized to view this report"
+            );
+        }
+
+        if (interview.status !== "completed") {
+            return res.send(
+                "Final report is available only after the interview is completed"
+            );
+        }
+
+        const transcripts = await Transcript.find({
+            interview: interview._id
+        }).sort({ timestamp: 1 });
+
+        const notes = await Note.find({
+            interview: interview._id,
+            interviewer: req.user.userId
+        }).sort({ createdAt: 1 });
+
+        const evaluation = await Evaluation.findOne({
+            interview: interview._id
+        });
+
+        const summary = await Summary.findOne({
+            interview: interview._id
+        });
+
+        res.render("interview-report", {
+            interview,
+            transcripts,
+            notes,
+            evaluation,
+            summary
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to load interview report");
+    }
+};
+
 
 module.exports = {
     showCreateInterview,
@@ -697,5 +773,6 @@ module.exports = {
     showEvaluationForm,
     saveEvaluation,
     generateSummary,
-    showInterviewSummary
+    showInterviewSummary,
+    showInterviewReport
 };
