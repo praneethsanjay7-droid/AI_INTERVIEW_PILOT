@@ -89,60 +89,60 @@
     <% } %>
 
     <hr>
-<h2>Interviewer Notes</h2>
 
-<% if (notes.length > 0) { %>
+    <h2>Interviewer Notes</h2>
 
-    <% notes.forEach(note => { %>
+    <% if (notes.length > 0) { %>
 
-        <p>
-            <strong>
-                <%= note.createdAt %>
-            </strong>
-        </p>
+        <% notes.forEach(note => { %>
 
-        <p>
-            <%= note.text %>
-        </p>
+            <p>
+                <strong>
+                    <%= note.createdAt %>
+                </strong>
+            </p>
 
-        <hr>
+            <p>
+                <%= note.text %>
+            </p>
 
-    <% }); %>
+            <hr>
 
-<% } else { %>
+        <% }); %>
 
-    <p>No interviewer notes were recorded.</p>
+    <% } else { %>
 
-<% } %>
+        <p>No interviewer notes were recorded.</p>
+
+    <% } %>
 
     <h2>Interview Transcript</h2>
-<h2>Interview Transcript</h2>
 
-<% if (transcripts.length > 0) { %>
+    <% if (transcripts.length > 0) { %>
 
-    <% transcripts.forEach(transcript => { %>
+        <% transcripts.forEach(transcript => { %>
 
-        <p>
-            <strong>
-                <%= transcript.speaker %>
-            </strong>
-            -
-            <%= transcript.timestamp %>
-        </p>
+            <p>
+                <strong>
+                    <%= transcript.speaker %>
+                </strong>
+                -
+                <%= transcript.timestamp %>
+            </p>
 
-        <p>
-            <%= transcript.text %>
-        </p>
+            <p>
+                <%= transcript.text %>
+            </p>
 
-        <hr>
+            <hr>
 
-    <% }); %>
+        <% }); %>
 
-<% } else { %>
+    <% } else { %>
 
-    <p>No transcript was recorded.</p>
+        <p>No transcript was recorded.</p>
 
-<% } %>
+    <% } %>
 
     <hr>
 

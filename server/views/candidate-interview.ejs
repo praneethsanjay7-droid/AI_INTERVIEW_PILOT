@@ -132,6 +132,112 @@
         });
     });
 
+    const enableMediaBtn = document.getElementById("enableMediaBtn");
+    const localVideo = document.getElementById("localVideo");
+    const remoteVideo = document.getElementById("remoteVideo");
+    const mediaStatus = document.getElementById("mediaStatus");
+
+    let candidateStream = null;
+    let peerConnection = null;
+    let pendingOffer = null;
+    const pendingIceCandidates = [];
+
+    const createPeerConnection = () => {
+        if (peerConnection) {
+            return;
+        }
+
+        peerConnection = new RTCPeerConnection();
+
+        peerConnection.addEventListener("track", (event) => {
+            if (event.streams[0]) {
+                remoteVideo.srcObject = event.streams[0];
+            }
+        });
+
+        peerConnection.addEventListener("icecandidate", (event) => {
+            if (event.candidate) {
+                socket.emit("webrtc-ice-candidate", {
+                    interviewId,
+                    candidate: event.candidate
+                });
+            }
+        });
+    };
+
+    const answerPendingOffer = async () => {
+        if (!candidateStream || !pendingOffer) {
+            return;
+        }
+
+        createPeerConnection();
+
+        try {
+            await peerConnection.setRemoteDescription(pendingOffer);
+            pendingOffer = null;
+
+            candidateStream.getTracks().forEach((track) => {
+                peerConnection.addTrack(track, candidateStream);
+            });
+
+            while (pendingIceCandidates.length > 0) {
+                await peerConnection.addIceCandidate(
+                    pendingIceCandidates.shift()
+                );
+            }
+
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+
+            socket.emit("webrtc-answer", {
+                interviewId,
+                answer: peerConnection.localDescription
+            });
+        } catch (error) {
+            console.error("Failed to answer interviewer offer:", error);
+            mediaStatus.textContent = "Could not connect interview media.";
+        }
+    };
+
+    enableMediaBtn.addEventListener("click", async () => {
+        try {
+            candidateStream = await navigator.mediaDevices.getUserMedia({
+                video: true,
+                audio: true
+            });
+
+            localVideo.srcObject = candidateStream;
+            createPeerConnection();
+            enableMediaBtn.disabled = true;
+            mediaStatus.textContent = "Camera and microphone enabled.";
+            socket.emit("candidate-media-enabled", interviewId);
+
+            await answerPendingOffer();
+        } catch (error) {
+            console.error("Candidate camera or microphone error:", error);
+            mediaStatus.textContent =
+                "Could not access camera or microphone.";
+        }
+    });
+
+    socket.on("webrtc-offer", async (data) => {
+        pendingOffer = data.offer;
+        await answerPendingOffer();
+    });
+
+    socket.on("webrtc-ice-candidate", async (data) => {
+        if (!peerConnection || !peerConnection.remoteDescription) {
+            pendingIceCandidates.push(data.candidate);
+            return;
+        }
+
+        try {
+            await peerConnection.addIceCandidate(data.candidate);
+        } catch (error) {
+            console.error("Failed to add interviewer ICE candidate:", error);
+        }
+    });
+
     const startRecordingBtn = document.getElementById("startRecordingBtn");
     const stopRecordingBtn = document.getElementById("stopRecordingBtn");
     const recordingStatus = document.getElementById("recordingStatus");

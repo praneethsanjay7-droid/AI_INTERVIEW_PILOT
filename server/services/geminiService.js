@@ -32,7 +32,7 @@ const generateLocalSummary = async (prompt) => {
 
     const timeout = setTimeout(() => {
         controller.abort();
-    }, 120000); // 2 minutes
+    }, 300000); // 5 minutes
 
     try {
 
@@ -145,6 +145,14 @@ for (let attempt = 1; attempt <= 3; attempt++) {
         break;
 
     } catch (err) {
+
+        if (err.status === 429) {
+            console.log(
+                "Gemini quota or rate limit reached. Switching to Ollama + Qwen..."
+            );
+
+            return generateLocalSummary(prompt);
+        }
 
         if (err.status !== 503) {
             throw err;
