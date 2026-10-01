@@ -24,6 +24,68 @@ Return only the questions as a numbered list.
 
     return response.text;
 };
+const generateLocalSummary = async (prompt) => {
+
+    console.log("Starting Ollama + Qwen...");
+
+    const controller = new AbortController();
+
+    const timeout = setTimeout(() => {
+        controller.abort();
+    }, 120000); // 2 minutes
+
+    try {
+
+        const response = await fetch(
+            "http://localhost:11434/api/chat",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: "qwen3:4b",
+                    messages: [
+                        {
+                            role: "user",
+                            content: prompt
+                        }
+                    ],
+                    stream: false,
+                    format: "json"
+                }),
+                signal: controller.signal
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                `Ollama request failed with status ${response.status}`
+            );
+        }
+
+        const data = await response.json();
+
+        const text = data.message.content.trim();
+
+        console.log("OLLAMA RAW SUMMARY:");
+        console.log(text);
+
+        const summary = JSON.parse(text);
+
+        return {
+            strengths: summary.strengths || "",
+            weaknesses: summary.weaknesses || "",
+            technicalAssessment: summary.technicalAssessment || "",
+            overallAssessment: summary.overallAssessment || "",
+            recommendation: summary.recommendation || ""
+        };
+
+    } finally {
+        clearTimeout(timeout);
+    }
+};
+
 
 
 const generateInterviewSummary = async (
@@ -59,26 +121,66 @@ Problem Solving: ${evaluation.problemSolving}/5
 Overall Rating: ${evaluation.overallRating}/5
 Comments: ${evaluation.comments}
 
-Generate a structured interview summary with exactly these sections:
+Create a concise interview summary.
 
-Strengths:
-Weaknesses:
-Technical Assessment:
-Overall Assessment:
-Recommendation:
-
-Keep the summary factual and based only on the provided
-transcript, notes, and evaluation.
+Return the result as JSON with exactly these five fields:
+- strengths
+- weaknesses
+- technicalAssessment
+- overallAssessment
+- recommendation
 `;
+let response;
 
-    const response = await ai.models.generateContent({
-        model: "gemini-3.8-flash",
-        contents: prompt
-    });
+for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+        response = await ai.models.generateContent({
+            model: "gemini-3.8-flash",
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json"
+            }
+        });
 
-    return response.text;
+        break;
+
+    } catch (err) {
+
+        if (err.status !== 503) {
+            throw err;
+        }
+
+        console.log(
+            `Gemini temporarily unavailable. Retry ${attempt}/3...`
+        );
+
+        if (attempt === 3) {
+            console.log(
+                "Gemini unavailable. Switching to Ollama + Qwen..."
+            );
+
+            return generateLocalSummary(prompt);
+        }
+
+        await new Promise(resolve =>
+            setTimeout(resolve, 2000)
+        );
+    }
+}
+
+
+    const text = response.text.trim();
+
+    const summary = JSON.parse(text);
+
+    return {
+        strengths: summary.strengths || "",
+        weaknesses: summary.weaknesses || "",
+        technicalAssessment: summary.technicalAssessment || "",
+        overallAssessment: summary.overallAssessment || "",
+        recommendation: summary.recommendation || ""
+    };
 };
-
 
 module.exports = {
     generateFollowUpQuestions,

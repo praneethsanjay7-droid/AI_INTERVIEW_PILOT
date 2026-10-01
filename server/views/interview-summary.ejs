@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Interview Summary</title>
+</head>
+
+<body>
+
+    <h1>AI Interview Summary</h1>
+
+    <hr>
+
+    <h2>Candidate</h2>
+
+    <p>
+        <strong>Name:</strong>
+        <%= interview.application.candidate.name %>
+    </p>
+
+    <p>
+        <strong>Email:</strong>
+        <%= interview.application.candidate.email %>
+    </p>
+
+    <h2>Position</h2>
+
+    <p>
+        <%= interview.application.job.title %>
+    </p>
+
+    <hr>
+
+    <h2>Strengths</h2>
+
+    <p>
+        <%= summary.strengths %>
+    </p>
+
+    <h2>Weaknesses</h2>
+
+    <p>
+        <%= summary.weaknesses %>
+    </p>
+
+    <h2>Technical Assessment</h2>
+
+    <p>
+        <%= summary.technicalAssessment %>
+    </p>
+
+    <h2>Overall Assessment</h2>
+
+    <p>
+        <%= summary.overallAssessment %>
+    </p>
+
+    <h2>Recommendation</h2>
+
+    <p>
+        <%= summary.recommendation %>
+    </p>
+
+    <hr>
+
+    <a href="/interview-room/<%= interview._id %>">
+        Back to Interview
+    </a>
+
+</body>
+
+</html>

@@ -512,14 +512,14 @@ const saveEvaluation = async (req, res) => {
                 }
             },
             {
-                new: true,
+                returnDocument: "after",
                 upsert: true,
                 runValidators: true,
                 setDefaultsOnInsert: true
             }
         );
 
-res.redirect(`/interview-room/${interview._id}/evaluation`);
+res.redirect(`/interview-room/${interview._id}`);
     } catch (err) {
         console.log(err);
         res.status(500).send("Failed to save evaluation");
@@ -584,30 +584,30 @@ const generateSummary = async (req, res) => {
             );
         }
 
-        const summaryText = await generateInterviewSummary(
-            transcripts,
-            notes,
-            evaluation
-        );
-
-        await Summary.findOneAndUpdate(
-            { interview: interview._id },
-            {
-                $set: {
-                    interviewer: req.user.userId,
-                    strengths: summaryText,
-                    weaknesses: "",
-                    technicalAssessment: "",
-                    overallAssessment: "",
-                    recommendation: ""
-                }
-            },
-            {
-                new: true,
-                upsert: true,
-                setDefaultsOnInsert: true
-            }
-        );
+       const summary = await generateInterviewSummary(
+    transcripts,
+    notes,
+    evaluation
+);
+await Summary.findOneAndUpdate(
+    { interview: interview._id },
+    {
+        $set: {
+            interviewer: req.user.userId,
+            strengths: summary.strengths,
+            weaknesses: summary.weaknesses,
+            technicalAssessment: summary.technicalAssessment,
+            overallAssessment: summary.overallAssessment,
+            recommendation: summary.recommendation
+        }
+    },
+    {
+        returnDocument: "after",
+        upsert: true,
+        runValidators: true,
+        setDefaultsOnInsert: true
+    }
+);
 
         res.send("Interview summary generated successfully");
 
@@ -616,6 +616,73 @@ const generateSummary = async (req, res) => {
         res.status(500).send("Failed to generate interview summary");
     }
 };
+
+const showInterviewSummary = async (req, res) => {
+    try {
+        if (!mongoose.isValidObjectId(req.params.interviewId)) {
+            return res.status(404).send("Interview not found");
+        }
+
+        const interview = await Interview.findById(req.params.interviewId)
+            .populate({
+                path: "application",
+                populate: [
+                    {
+                        path: "candidate",
+                        select: "name email"
+                    },
+                    {
+                        path: "job",
+                        select: "title createdBy"
+                    }
+                ]
+            });
+
+        if (!interview) {
+            return res.status(404).send("Interview not found");
+        }
+
+        if (
+            !isOwnedBy(interview.interviewer, req.user.userId) ||
+            !interview.application ||
+            !interview.application.job ||
+            !isOwnedBy(
+                interview.application.job.createdBy,
+                req.user.userId
+            )
+        ) {
+            return res.status(403).send(
+                "You are not authorized to view this summary"
+            );
+        }
+
+        if (interview.status !== "completed") {
+            return res.send(
+                "Summary is available only after the interview is completed"
+            );
+        }
+
+        const summary = await Summary.findOne({
+            interview: interview._id
+        });
+
+        if (!summary) {
+            return res.send(
+                "Interview summary has not been generated yet"
+            );
+        }
+
+        res.render("interview-summary", {
+            interview,
+            summary
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to load interview summary");
+    }
+};
+
 
 module.exports = {
     showCreateInterview,
@@ -629,5 +696,6 @@ module.exports = {
     endInterview,
     showEvaluationForm,
     saveEvaluation,
-    generateSummary
+    generateSummary,
+    showInterviewSummary
 };
