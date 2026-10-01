@@ -303,13 +303,10 @@ const saveNote = async (req, res) => {
         }
 
         if (
-            !isOwnedBy(interview.interviewer, req.user.userId) ||
-            !interview.application ||
+            !isOwnedBy(interview.interviewer, req.user.userId) &&
+            (!interview.application ||
             !interview.application.job ||
-            !isOwnedBy(
-                interview.application.job.createdBy,
-                req.user.userId
-            )
+            !isOwnedBy(interview.application.job.createdBy, req.user.userId))
         ) {
             return res.status(403).send(
                 "You are not authorized to add notes to this interview"

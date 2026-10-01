@@ -18,7 +18,7 @@ Return only the questions as a numbered list.
 `;
 
     const response = await ai.models.generateContent({
-        model: "gemini-3.8-flash",
+        model: "gemini-2.5-flash",
         contents: prompt
     });
 
@@ -135,7 +135,7 @@ let response;
 for (let attempt = 1; attempt <= 3; attempt++) {
     try {
         response = await ai.models.generateContent({
-            model: "gemini-3.8-flash",
+            model: "gemini-2.5-flash",
             contents: prompt,
             config: {
                 responseMimeType: "application/json"

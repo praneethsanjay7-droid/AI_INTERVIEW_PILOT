@@ -360,6 +360,74 @@
                 }
             });
         }
+
+        // --- Start Speaking (Web Speech API) Logic ---
+        const startSpeechBtn = document.getElementById("startSpeechBtn");
+        const stopSpeechBtn = document.getElementById("stopSpeechBtn");
+        const speechStatus = document.getElementById("speechStatus");
+        const speechText = document.getElementById("speechText");
+        
+        let recognition = null;
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            
+            recognition.onresult = (event) => {
+                let finalTranscript = '';
+                let interimTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                        // Emit final transcript to socket
+                        socket.emit("transcript", {
+                            interviewId: interviewId,
+                            text: event.results[i][0].transcript.trim(),
+                            speaker: "candidate"
+                        });
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+                if (speechText) {
+                    speechText.innerHTML = finalTranscript + '<i style="color:#94A3B8;">' + interimTranscript + '</i>';
+                }
+            };
+            
+            recognition.onerror = (event) => {
+                console.error("Speech recognition error", event.error);
+                if (speechStatus) speechStatus.textContent = "Error: " + event.error;
+            };
+            
+            recognition.onend = () => {
+                if (startSpeechBtn) startSpeechBtn.disabled = false;
+                if (stopSpeechBtn) stopSpeechBtn.disabled = true;
+                if (speechStatus) speechStatus.textContent = "Stopped listening.";
+            };
+        } else {
+            if (speechStatus) speechStatus.textContent = "Speech Recognition not supported in this browser.";
+            if (startSpeechBtn) startSpeechBtn.disabled = true;
+        }
+
+        if (startSpeechBtn && recognition) {
+            startSpeechBtn.addEventListener("click", () => {
+                recognition.start();
+                startSpeechBtn.disabled = true;
+                if (stopSpeechBtn) stopSpeechBtn.disabled = false;
+                if (speechStatus) speechStatus.textContent = "Listening...";
+                if (speechText) speechText.textContent = "";
+            });
+        }
+
+        if (stopSpeechBtn && recognition) {
+            stopSpeechBtn.addEventListener("click", () => {
+                recognition.stop();
+                startSpeechBtn.disabled = false;
+                stopSpeechBtn.disabled = true;
+                if (speechStatus) speechStatus.textContent = "Stopped listening.";
+            });
+        }
     </script>
 
 </body>
