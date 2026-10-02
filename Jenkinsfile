@@ -41,7 +41,11 @@ stage('Docker Hub Login Test') {
                 passwordVariable: 'DOCKERHUB_TOKEN'
             )
         ]) {
-            bat 'echo %DOCKERHUB_TOKEN% | docker login -u "%DOCKERHUB_USERNAME%" --password-stdin'
+            powershell '''
+                $env:DOCKER_CONFIG = "$env:WORKSPACE\\.docker"
+                New-Item -ItemType Directory -Force -Path $env:DOCKER_CONFIG | Out-Null
+                $env:DOCKERHUB_TOKEN | docker login -u $env:DOCKERHUB_USERNAME --password-stdin
+            '''
         }
     }
 }
