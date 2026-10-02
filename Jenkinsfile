@@ -5,7 +5,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                echo 'Code will be checked out from GitHub'
+                echo 'Checking out InterviewPilot code from GitHub'
             }
         }
 
@@ -24,6 +24,12 @@ pipeline {
                 dir('server') {
                     bat 'npm install'
                 }
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                bat 'docker build -f infra/docker/server.Dockerfile -t interviewpilot-backend:%BUILD_NUMBER% .'
             }
         }
     }
