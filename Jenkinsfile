@@ -33,20 +33,18 @@ pipeline {
             }
         }
 
-        stage('Docker Push') {
-    steps {
-        withCredentials([
-            usernamePassword(
-                credentialsId: 'dockerhub-credentials-system',
-                usernameVariable: 'DOCKERHUB_USERNAME',
-                passwordVariable: 'DOCKERHUB_TOKEN'
-            )
-        ]) {
-            bat 'echo %DOCKERHUB_TOKEN% | docker login -u "%DOCKERHUB_USERNAME%" --password-stdin'
-            bat 'docker tag interviewpilot-backend:%BUILD_NUMBER% %DOCKERHUB_USERNAME%/interviewpilot-backend:%BUILD_NUMBER%'
-            bat 'docker push %DOCKERHUB_USERNAME%/interviewpilot-backend:%BUILD_NUMBER%'
+        stage('Start Application') {
+            steps {
+                bat 'docker compose -f infra/docker/docker-compose.yml up -d'
+            }
         }
-    }
-}
+
+        stage('Run Tests') {
+            steps {
+                dir('server') {
+                    bat 'npm test'
+                }
+            }
+        }
     }
 }
