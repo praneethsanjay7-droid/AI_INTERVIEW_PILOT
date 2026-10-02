@@ -11,7 +11,9 @@ const server=http.createServer(app);
 const {Server}=require("socket.io");
 const io=new Server(server);
 
-connectDB();
+if (require.main === module) {
+    connectDB();
+}
 
 
 const PORT = process.env.PORT || 5000;
@@ -169,6 +171,9 @@ try {
 
 });
 
-server.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
+if (require.main === module) {
+    server.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+    });
+}
+module.exports = server;
