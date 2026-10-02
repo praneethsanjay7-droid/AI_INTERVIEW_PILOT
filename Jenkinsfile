@@ -32,6 +32,19 @@ pipeline {
                 bat 'docker build -f infra/docker/server.Dockerfile -t interviewpilot-backend:%BUILD_NUMBER% .'
             }
         }
+stage('Docker Hub Login Test') {
+    steps {
+        withCredentials([
+            usernamePassword(
+                credentialsId: 'dockerhub-credentials-system',
+                usernameVariable: 'DOCKERHUB_USERNAME',
+                passwordVariable: 'DOCKERHUB_TOKEN'
+            )
+        ]) {
+            bat 'echo %DOCKERHUB_TOKEN% | docker login -u "%DOCKERHUB_USERNAME%" --password-stdin'
+        }
+    }
+}
 
         stage('Start Application') {
     steps {
