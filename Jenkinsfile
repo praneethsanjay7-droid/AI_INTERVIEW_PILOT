@@ -42,8 +42,9 @@ pipeline {
                 passwordVariable: 'DOCKERHUB_TOKEN'
             )
         ]) {
-            bat 'echo Docker username is %DOCKERHUB_USERNAME%'
-            bat 'if defined DOCKERHUB_TOKEN (echo Docker token is PRESENT) else (echo Docker token is MISSING)'
+            bat 'echo %DOCKERHUB_TOKEN% | docker login -u "%DOCKERHUB_USERNAME%" --password-stdin'
+            bat 'docker tag interviewpilot-backend:%BUILD_NUMBER% %DOCKERHUB_USERNAME%/interviewpilot-backend:%BUILD_NUMBER%'
+            bat 'docker push %DOCKERHUB_USERNAME%/interviewpilot-backend:%BUILD_NUMBER%'
         }
     }
 }
