@@ -34,10 +34,27 @@ pipeline {
         }
 
         stage('Start Application') {
-            steps {
-                bat 'docker-compose -f infra/docker/docker-compose.yml up -d'
-            }
+    steps {
+        withCredentials([
+            string(credentialsId: 'mongo-uri', variable: 'MONGO_URI'),
+            string(credentialsId: 'cloudinary-api-key', variable: 'CLOUDINARY_API_KEY'),
+            string(credentialsId: 'cloudinary-api-secret', variable: 'CLOUDINARY_API_SECRET'),
+            string(credentialsId: 'gemini-api-key', variable: 'GEMINI_API_KEY')
+        ]) {
+            powershell '''
+                @"
+PORT=5000
+MONGO_URI=$env:MONGO_URI
+CLOUDINARY_API_KEY=$env:CLOUDINARY_API_KEY
+CLOUDINARY_API_SECRET=$env:CLOUDINARY_API_SECRET
+GEMINI_API_KEY=$env:GEMINI_API_KEY
+"@ | Set-Content -Path "server/.env"
+            '''
+
+            bat 'docker-compose -f infra/docker/docker-compose.yml up -d'
         }
+    }
+}
 
         stage('Run Tests') {
             steps {
