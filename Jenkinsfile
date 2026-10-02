@@ -34,10 +34,13 @@ pipeline {
         }
 
         stage('Start Application') {
-            steps {
-                bat 'docker compose -f infra/docker/docker-compose.yml up -d'
-            }
-        }
+    steps {
+        bat 'where docker'
+        bat 'where docker-compose'
+        bat 'docker compose version'
+        bat 'docker-compose version'
+    }
+}
 
         stage('Run Tests') {
             steps {
