@@ -63,5 +63,17 @@ GEMINI_API_KEY=$env:GEMINI_API_KEY
                 }
             }
         }
+        stage('Deploy to Render') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'render-deploy-hook', variable: 'RENDER_DEPLOY_HOOK')
+                ]) {
+                    powershell '''
+                        Invoke-RestMethod -Method Post -Uri $env:RENDER_DEPLOY_HOOK | Out-Null
+                        Write-Host "Render deployment triggered successfully"
+                    '''
+                }
+            }
+        }
     }
 }
