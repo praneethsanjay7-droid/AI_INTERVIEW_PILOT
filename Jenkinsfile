@@ -32,5 +32,21 @@ pipeline {
                 bat 'docker build -f infra/docker/server.Dockerfile -t interviewpilot-backend:%BUILD_NUMBER% .'
             }
         }
+
+        stage('Docker Push') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-credentials',
+                        usernameVariable: 'DOCKERHUB_USERNAME',
+                        passwordVariable: 'DOCKERHUB_TOKEN'
+                    )
+                ]) {
+                    bat 'echo %DOCKERHUB_TOKEN% | docker login -u "%DOCKERHUB_USERNAME%" --password-stdin'
+                    bat 'docker tag interviewpilot-backend:%BUILD_NUMBER% %DOCKERHUB_USERNAME%/interviewpilot-backend:%BUILD_NUMBER%'
+                    bat 'docker push %DOCKERHUB_USERNAME%/interviewpilot-backend:%BUILD_NUMBER%'
+                }
+            }
+        }
     }
 }
