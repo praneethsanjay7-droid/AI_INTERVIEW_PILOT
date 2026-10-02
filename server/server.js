@@ -145,10 +145,10 @@ try {
         }
     );
 
-} catch (aiError) {
+}  catch (aiError) {
 
     console.log(
-        "Gemini follow-up generation failed:",
+        "AI follow-up question generation failed:",
         aiError
     );
 
